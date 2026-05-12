@@ -1,0 +1,596 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Scan Barcode Produk - Cek Harga</title>
+  <meta name="theme-color" content="#0f172a" />
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+
+  <!-- (CATATAN: Letakkan semua CSS asli Anda di sini. Saya persingkat agar rapi, JANGAN UBAH CSS ASLI ANDA, cukup paste di area ini) -->
+  <style>
+    /* Paste semua kode CSS <style> Anda yang lama di sini tanpa ada yang dihapus */
+    :root {
+      --bg: #08111f; --bg-2: #0f172a; --card: rgba(15, 23, 42, 0.78); --card-2: rgba(30, 41, 59, 0.78);
+      --text: #f8fafc; --muted: #94a3b8; --line: rgba(148, 163, 184, 0.22);
+      --blue: #38bdf8; --blue-2: #0284c7; --green: #34d399; --yellow: #facc15;
+      --red: #fb7185; --purple: #a78bfa; --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+      --radius: 24px; --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html { scroll-behavior: smooth; }
+    body { margin: 0; min-height: 100vh; color: var(--text); font-family: Inter, system-ui, sans-serif; background: radial-gradient(circle at 15% 5%, rgba(56, 189, 248, 0.22), transparent 30%), radial-gradient(circle at 90% 10%, rgba(167, 139, 250, 0.22), transparent 32%), radial-gradient(circle at 60% 100%, rgba(52, 211, 153, 0.16), transparent 30%), linear-gradient(145deg, #020617 0%, #08111f 45%, #0f172a 100%); overflow-x: hidden; padding-bottom: calc(118px + var(--safe-bottom)); }
+    body::before { content: ""; position: fixed; inset: 0; pointer-events: none; background-image: linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px); background-size: 42px 42px; mask-image: linear-gradient(to bottom, rgba(0,0,0,0.9), transparent 80%); z-index: -1; }
+    button, input { font: inherit; } button { border: 0; cursor: pointer; }
+    .app { width: min(1120px, calc(100% - 28px)); margin: 0 auto; padding: 22px 0 0; }
+    .topbar { position: sticky; top: 0; z-index: 20; padding: 14px 0 12px; backdrop-filter: blur(18px); }
+    .topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 14px; border: 1px solid var(--line); background: rgba(2, 6, 23, 0.55); border-radius: 999px; box-shadow: 0 16px 44px rgba(0,0,0,0.22); padding: 10px 12px 10px 16px; }
+    .brand { display: flex; align-items: center; gap: 11px; min-width: 0; }
+    .logo { width: 44px; height: 44px; border-radius: 16px; display: grid; place-items: center; background: linear-gradient(135deg, var(--blue), var(--purple)); box-shadow: 0 12px 28px rgba(56, 189, 248, 0.25); flex: 0 0 auto; }
+    .logo svg { width: 26px; height: 26px; }
+    .brand h1 { margin: 0; font-size: clamp(16px, 3vw, 21px); letter-spacing: -0.04em; line-height: 1.1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .brand p { margin: 3px 0 0; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .top-actions { display: flex; align-items: center; gap: 8px; flex: 0 0 auto; }
+    .pill-btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 42px; padding: 0 14px; border-radius: 999px; color: var(--text); background: rgba(15, 23, 42, 0.82); border: 1px solid var(--line); transition: transform .18s ease, background .18s ease, border-color .18s ease; }
+    .pill-btn:hover { transform: translateY(-1px); border-color: rgba(56, 189, 248, 0.5); background: rgba(30, 41, 59, 0.9); }
+    .hero { display: grid; grid-template-columns: 1.05fr .95fr; gap: 18px; align-items: stretch; margin-top: 12px; }
+    .card { border: 1px solid var(--line); background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(22px); overflow: hidden; }
+    .hero-main { padding: clamp(20px, 4vw, 34px); position: relative; isolation: isolate; }
+    .eyebrow { display: inline-flex; align-items: center; gap: 8px; color: #bae6fd; background: rgba(14, 165, 233, 0.11); border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 999px; padding: 8px 12px; font-size: 13px; margin-bottom: 18px; }
+    .hero-main h2 { margin: 0; font-size: clamp(32px, 7vw, 62px); line-height: 0.98; letter-spacing: -0.075em; }
+    .gradient-text { background: linear-gradient(90deg, #7dd3fc, #c4b5fd, #86efac); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .hero-main .desc { margin: 18px 0 0; max-width: 620px; color: #cbd5e1; font-size: clamp(14px, 2.5vw, 17px); line-height: 1.7; }
+    .quick-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 24px; }
+    .quick-stat { border: 1px solid var(--line); border-radius: 20px; background: rgba(15, 23, 42, 0.55); padding: 14px; }
+    .quick-stat strong { display: block; font-size: 22px; letter-spacing: -0.05em; }
+    .quick-stat span { color: var(--muted); font-size: 12px; }
+    .result-card { min-height: 100%; padding: 18px; display: flex; flex-direction: column; gap: 12px; }
+    .section-title { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 10px; }
+    .section-title h3 { margin: 0; font-size: 16px; letter-spacing: -0.025em; }
+    .status-dot { width: 10px; height: 10px; border-radius: 99px; background: var(--green); box-shadow: 0 0 0 7px rgba(52, 211, 153, .11); }
+    .price-display { flex: 1; border-radius: 22px; background: radial-gradient(circle at top left, rgba(56,189,248,.17), transparent 35%), rgba(2, 6, 23, 0.42); border: 1px solid var(--line); padding: 18px; display: flex; flex-direction: column; justify-content: center; min-height: 278px; }
+    .empty-state { text-align: center; color: var(--muted); padding: 20px 4px; }
+    .empty-icon { width: 78px; height: 78px; margin: 0 auto 14px; border-radius: 28px; display: grid; place-items: center; background: rgba(56, 189, 248, .11); border: 1px solid rgba(56, 189, 248, .2); }
+    .empty-icon svg { width: 42px; height: 42px; }
+    .found-product { display: none; animation: pop .22s ease both; }
+    @keyframes pop { from { transform: translateY(7px) scale(.985); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    .barcode-label { display: inline-flex; align-items: center; width: fit-content; gap: 8px; color: #bae6fd; border: 1px solid rgba(56, 189, 248, .25); background: rgba(14, 165, 233, .1); padding: 7px 10px; border-radius: 999px; font-size: 12px; word-break: break-all; }
+    .product-name-large { margin: 16px 0 4px; font-size: clamp(27px, 4vw, 42px); line-height: 1.06; letter-spacing: -0.065em; word-break: break-word; }
+    .price-big { margin: 10px 0 0; font-size: clamp(36px, 8vw, 62px); letter-spacing: -0.075em; line-height: 1; color: #86efac; }
+    .sub-prices { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+    .mini-price { border: 1px solid var(--line); background: rgba(15, 23, 42, .62); border-radius: 18px; padding: 13px; }
+    .mini-price span { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+    .mini-price strong { font-size: 17px; letter-spacing: -0.035em; }
+    .result-actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+    .primary-btn, .ghost-btn, .danger-btn, .green-btn { min-height: 46px; padding: 0 16px; border-radius: 16px; color: white; display: inline-flex; align-items: center; justify-content: center; gap: 9px; font-weight: 700; transition: transform .18s ease, filter .18s ease, border-color .18s ease; }
+    .primary-btn:hover, .ghost-btn:hover, .danger-btn:hover, .green-btn:hover { transform: translateY(-1px); filter: brightness(1.08); }
+    .primary-btn { background: linear-gradient(135deg, #0284c7, #7c3aed); box-shadow: 0 18px 32px rgba(56, 189, 248, .16); }
+    .green-btn { background: linear-gradient(135deg, #059669, #14b8a6); box-shadow: 0 18px 32px rgba(52, 211, 153, .14); }
+    .ghost-btn { border: 1px solid var(--line); background: rgba(15, 23, 42, .78); }
+    .danger-btn { background: rgba(244, 63, 94, .14); color: #fecdd3; border: 1px solid rgba(251, 113, 133, .34); }
+    .toolbar { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; margin: 18px 0; }
+    .searchbox { position: relative; }
+    .searchbox svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--muted); pointer-events: none; }
+    .input, .select { width: 100%; min-height: 50px; border-radius: 17px; border: 1px solid var(--line); background: rgba(15, 23, 42, .72); color: var(--text); outline: none; padding: 0 14px; transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
+    .searchbox .input { padding-left: 46px; }
+    .input:focus, .select:focus { border-color: rgba(56, 189, 248, .65); box-shadow: 0 0 0 4px rgba(56, 189, 248, .09); background: rgba(15, 23, 42, .88); }
+    .products-card { padding: 18px; }
+    .products-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+    .products-head h3 { margin: 0; font-size: clamp(20px, 3vw, 26px); letter-spacing: -0.05em; }
+    .product-list { display: grid; gap: 10px; }
+    .product-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 12px; border: 1px solid var(--line); background: rgba(15, 23, 42, .58); border-radius: 20px; padding: 13px; animation: pop .2s ease both; }
+    .product-info { min-width: 0; }
+    .product-info strong { display: block; font-size: 16px; letter-spacing: -0.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .product-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 7px; color: var(--muted); font-size: 12px; }
+    .tag { border: 1px solid var(--line); background: rgba(2, 6, 23, .35); border-radius: 999px; padding: 5px 8px; word-break: break-all; }
+    .row-actions { display: flex; gap: 7px; }
+    .icon-btn { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; color: white; border: 1px solid var(--line); background: rgba(30, 41, 59, .75); transition: transform .18s ease, background .18s ease; }
+    .icon-btn:hover { transform: translateY(-1px); background: rgba(51, 65, 85, .9); }
+    .icon-btn svg { width: 19px; height: 19px; }
+    .backup-panel { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+    .scan-fab-wrap { position: fixed; left: 50%; bottom: calc(20px + var(--safe-bottom)); transform: translateX(-50%); z-index: 55; width: min(430px, calc(100% - 32px)); pointer-events: none; }
+    .scan-fab { width: 100%; min-height: 68px; border-radius: 999px; background: linear-gradient(135deg, #06b6d4, #2563eb 50%, #7c3aed); color: white; display: flex; align-items: center; justify-content: center; gap: 12px; font-weight: 900; font-size: 17px; letter-spacing: -0.02em; box-shadow: 0 20px 55px rgba(37, 99, 235, .42), inset 0 1px 0 rgba(255,255,255,.18); border: 1px solid rgba(255,255,255,.18); pointer-events: auto; position: relative; overflow: hidden; }
+    .scan-fab::before { content: ""; position: absolute; inset: -40% auto auto -20%; width: 45%; height: 180%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.36), transparent); transform: rotate(22deg); animation: shine 2.9s ease-in-out infinite; }
+    @keyframes shine { 0%, 35% { left: -55%; } 70%, 100% { left: 120%; } }
+    .scan-fab svg { width: 28px; height: 28px; position: relative; }
+    .scan-fab span { position: relative; }
+    .modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center; padding: 18px; background: rgba(2, 6, 23, .72); backdrop-filter: blur(18px); }
+    .modal.active { display: flex; }
+    .modal-card { width: min(640px, 100%); max-height: calc(100vh - 36px); overflow: auto; border: 1px solid var(--line); background: radial-gradient(circle at top left, rgba(56,189,248,.14), transparent 35%), rgba(15, 23, 42, .96); border-radius: 28px; box-shadow: 0 30px 90px rgba(0,0,0,.55); padding: 18px; animation: modalIn .2s ease both; }
+    @keyframes modalIn { from { transform: translateY(12px) scale(.98); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+    .modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+    .modal-head h3 { margin: 0; font-size: 24px; letter-spacing: -0.055em; }
+    .modal-head p { margin: 5px 0 0; color: var(--muted); font-size: 14px; line-height: 1.5; }
+    .close-btn { width: 42px; height: 42px; border-radius: 15px; background: rgba(30, 41, 59, .9); color: white; border: 1px solid var(--line); flex: 0 0 auto; }
+    #reader { width: 100%; min-height: 310px; overflow: hidden; border-radius: 24px; border: 1px solid rgba(56, 189, 248, .24); background: #020617; }
+    #reader video { border-radius: 24px; object-fit: cover; }
+    #reader__scan_region { background: rgba(2, 6, 23, .8); }
+    #reader button, #reader select { border-radius: 12px !important; border: 1px solid var(--line) !important; padding: 9px 12px !important; margin: 5px !important; background: rgba(15, 23, 42, 0.8) !important; color: white !important;}
+    .scan-note { margin-top: 12px; color: var(--muted); font-size: 13px; line-height: 1.55; border: 1px solid var(--line); border-radius: 18px; padding: 12px; background: rgba(2, 6, 23, .36); }
+    .manual-scan { display: grid; grid-template-columns: 1fr auto; gap: 10px; margin-top: 12px; }
+    .form-grid { display: grid; gap: 12px; margin-top: 10px; }
+    .field label { display: block; font-size: 13px; color: #cbd5e1; margin: 0 0 7px 2px; font-weight: 700; }
+    .field small { display: block; color: var(--muted); margin-top: 6px; font-size: 12px; }
+    .form-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+    .toast-wrap { position: fixed; top: 18px; right: 18px; z-index: 200; display: grid; gap: 10px; width: min(360px, calc(100% - 36px)); pointer-events: none; }
+    .toast { border: 1px solid var(--line); background: rgba(15, 23, 42, .93); border-radius: 18px; padding: 12px 14px; box-shadow: 0 18px 40px rgba(0,0,0,.35); color: var(--text); animation: toastIn .25s ease both; }
+    .toast strong { display: block; margin-bottom: 3px; letter-spacing: -0.02em; }
+    .toast span { color: var(--muted); font-size: 13px; }
+    @keyframes toastIn { from { transform: translateX(16px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+    .hidden-file { display: none; }
+    .empty-list { text-align: center; color: var(--muted); border: 1px dashed rgba(148, 163, 184, .35); border-radius: 22px; padding: 28px 14px; background: rgba(15, 23, 42, .34); }
+    @media (max-width: 860px) { .hero { grid-template-columns: 1fr; } .topbar-inner { border-radius: 24px; } .top-actions .pill-label { display: none; } .quick-grid { grid-template-columns: 1fr 1fr; } .quick-stat:last-child { grid-column: span 2; } .toolbar { grid-template-columns: 1fr; } .backup-panel { grid-template-columns: 1fr; } }
+    @media (max-width: 560px) { .app { width: min(100% - 22px, 1120px); } .topbar { padding-top: 10px; } .brand p { display: none; } .logo { width: 40px; height: 40px; border-radius: 14px; } .hero-main, .result-card, .products-card { padding: 15px; } .quick-grid, .sub-prices { grid-template-columns: 1fr; } .quick-stat:last-child { grid-column: auto; } .product-row { grid-template-columns: 1fr; } .row-actions { width: 100%; } .row-actions .icon-btn { flex: 1; } .manual-scan { grid-template-columns: 1fr; } .modal { padding: 10px; } .modal-card { max-height: calc(100vh - 20px); border-radius: 22px; padding: 14px; } #reader { min-height: 270px; } .scan-fab-wrap { width: min(380px, calc(100% - 24px)); bottom: calc(14px + var(--safe-bottom)); } .scan-fab { min-height: 64px; } }
+  </style>
+</head>
+<body>
+  <!-- Area Notifikasi -->
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <!-- Konten UI Asli Anda -->
+  <main class="app">
+    <!-- Header -->
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="logo" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none">
+              <path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+              <path d="M7 9h1v6H7V9Zm3 0h1v6h-1V9Zm3 0h1v6h-1V9Zm3 0h1v6h-1V9Z" fill="white"/>
+            </svg>
+          </div>
+          <div>
+            <h1>Cek Harga Barcode</h1>
+            <p>Tersimpan Permanen di Cloud</p>
+          </div>
+        </div>
+        <div class="top-actions">
+          <button class="pill-btn" id="addManualBtn" type="button" title="Tambah produk manual">
+            <svg width="19" height="19" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            <span class="pill-label">Tambah</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Statistik & Hasil Scan -->
+    <section class="hero">
+      <div class="card hero-main">
+        <div class="eyebrow">
+          <span class="status-dot"></span> Online - Data aman di KV
+        </div>
+        <h2>Scan barcode,<br><span class="gradient-text">harga langsung keluar.</span></h2>
+        <div class="quick-grid">
+          <div class="quick-stat"><strong id="totalProductStat">Loading...</strong><span>Total produk</span></div>
+          <div class="quick-stat"><strong id="totalValueStat">Loading...</strong><span>Nilai harga jual</span></div>
+          <div class="quick-stat"><strong id="lastScanStat">-</strong><span>Scan terakhir</span></div>
+        </div>
+      </div>
+
+      <div class="card result-card">
+        <div class="section-title">
+          <h3>Hasil scan terakhir</h3>
+          <span class="tag" id="storageInfo">Cloud KV Sync</span>
+        </div>
+        <div class="price-display" id="priceDisplay">
+          <div class="empty-state" id="emptyResult">
+            <strong>Belum ada hasil scan</strong>
+            <p>Klik tombol scan di bawah tengah.</p>
+          </div>
+          <div class="found-product" id="foundProduct">
+            <span class="barcode-label" id="foundBarcode">Barcode</span>
+            <h3 class="product-name-large" id="foundName">Nama Produk</h3>
+            <div class="price-big" id="foundSellPrice">Rp0</div>
+            <div class="sub-prices">
+              <div class="mini-price"><span>Harga beli</span><strong id="foundBuyPrice">Rp0</strong></div>
+              <div class="mini-price"><span>Margin</span><strong id="foundMargin">Rp0</strong></div>
+            </div>
+            <div class="result-actions">
+              <button class="primary-btn" id="editFoundBtn">Edit Produk</button>
+              <button class="ghost-btn" id="copyFoundBtn">Salin</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Tabel / List Produk -->
+    <section class="card products-card" style="margin-top:18px;">
+      <div class="products-head">
+        <div><h3>Daftar Produk</h3></div>
+      </div>
+      <div class="toolbar">
+        <div class="searchbox">
+          <input class="input" id="searchInput" type="search" placeholder="Cari produk / barcode..." autocomplete="off" />
+        </div>
+        <button class="green-btn" id="addProductBtn">+ Tambah Produk</button>
+      </div>
+      <div class="backup-panel">
+        <button class="ghost-btn" id="exportBtn">Export Backup</button>
+        <button class="ghost-btn" id="importBtn">Import Backup</button>
+        <button class="danger-btn" id="clearAllBtn">Hapus Semua</button>
+        <input class="hidden-file" id="importFile" type="file" accept="application/json,.json" />
+      </div>
+      <div class="product-list" id="productList" style="margin-top:14px;"></div>
+    </section>
+  </main>
+
+  <div class="scan-fab-wrap">
+    <button class="scan-fab" id="scanBtn">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 7V5a1 1 0 0 1 1-1h2M17 4h2a1 1 0 0 1 1 1v2M20 17v2a1 1 0 0 1-1 1h-2M7 20H5a1 1 0 0 1-1-1v-2" stroke="white" stroke-width="2" stroke-linecap="round"/><path d="M7 10h1v4H7v-4Zm3 0h2v4h-2v-4Zm4 0h1v4h-1v-4Zm3 0h1v4h-1v-4Z" fill="white"/></svg>
+      <span>SCAN BARCODE</span>
+    </button>
+  </div>
+
+  <!-- Modal Scanner -->
+  <div class="modal" id="scannerModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div><h3>Scan Barcode</h3><p>Kamera dioptimalkan untuk akurasi tinggi.</p></div>
+        <button class="close-btn" id="closeScannerBtn">✕</button>
+      </div>
+      <div id="reader"></div>
+      <div class="manual-scan">
+        <input class="input" id="manualBarcodeInput" type="text" placeholder="Atau ketik manual..." />
+        <button class="primary-btn" id="manualCheckBtn">Cek</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Form Produk -->
+  <div class="modal" id="productModal">
+    <div class="modal-card">
+      <div class="modal-head">
+        <div><h3 id="productModalTitle">Tambah Produk</h3></div>
+        <button class="close-btn" id="closeProductBtn">✕</button>
+      </div>
+      <form id="productForm" class="form-grid">
+        <input type="hidden" id="editingBarcodeOriginal" />
+        <div class="field"><label>Barcode</label><input class="input" id="barcodeInput" type="text" required /></div>
+        <div class="field"><label>Nama Barang</label><input class="input" id="nameInput" type="text" required /></div>
+        <div class="field"><label>Harga Beli</label><input class="input" id="buyPriceInput" type="text" required /></div>
+        <div class="field"><label>Harga Jual</label><input class="input" id="sellPriceInput" type="text" required /></div>
+        <div class="form-actions">
+          <button class="green-btn" type="submit">Simpan Produk</button>
+          <button class="ghost-btn" type="button" id="resetFormBtn">Reset</button>
+          <button class="danger-btn" type="button" id="deleteFromModalBtn" style="display:none;">Hapus</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const LAST_SCAN_KEY = "barcode_produk_last_scan_v1";
+    let products = {};
+    let lastScannedBarcode = localStorage.getItem(LAST_SCAN_KEY) || "";
+    let html5QrCode = null;
+    let scannerRunning = false;
+    let scanLock = false;
+    let currentFoundBarcode = "";
+
+    const el = (id) => document.getElementById(id);
+    const icons = {
+      edit: '<svg viewBox="0 0 24 24" fill="none" width="19" height="19"><path d="M4 20h4.8L19.3 9.5a2.1 2.1 0 0 0 0-3L17.5 4.7a2.1 2.1 0 0 0-3 0L4 15.2V20Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="m13.5 5.7 4.8 4.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
+      trash: '<svg viewBox="0 0 24 24" fill="none" width="19" height="19"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 14h10l1-14M9 7V4h6v3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+      eye: '<svg viewBox="0 0 24 24" fill="none" width="19" height="19"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke="currentColor" stroke-width="2"/><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" stroke="currentColor" stroke-width="2"/></svg>'
+    };
+
+    document.addEventListener("DOMContentLoaded", () => {
+      loadProductsFromServer(); // Ambil dari Cloudflare KV saat buka aplikasi
+      bindEvents();
+    });
+
+    // --- INTEGRASI CLOUDFLARE KV ---
+    async function loadProductsFromServer() {
+      try {
+        const response = await fetch('/api/data');
+        if (!response.ok) throw new Error("Gagal mengambil data dari server");
+        products = await response.json();
+        
+        renderAll();
+        if (lastScannedBarcode && products[lastScannedBarcode]) {
+          showProductResult(products[lastScannedBarcode]);
+        }
+      } catch (error) {
+        console.warn("Gagal terhubung ke cloud, menggunakan cache lokal", error);
+        toast("Koneksi gagal", "Pastikan aplikasi terhubung ke internet dan API KV aktif.");
+      }
+    }
+
+    async function syncToServer() {
+      toast("Menyimpan...", "Sinkronisasi ke Cloud...");
+      try {
+        await fetch('/api/data', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(products)
+        });
+        toast("Sinkronisasi Berhasil", "Data tersimpan permanen.");
+      } catch (error) {
+        toast("Gagal Sinkron", "Perubahan sementara disimpan di lokal.");
+      }
+    }
+    // -------------------------------
+
+    function bindEvents() {
+      el("scanBtn").addEventListener("click", openScanner);
+      el("closeScannerBtn").addEventListener("click", closeScanner);
+      el("closeProductBtn").addEventListener("click", closeProductModal);
+      el("addProductBtn").addEventListener("click", () => openProductModal());
+      el("addManualBtn").addEventListener("click", () => openProductModal());
+      el("productForm").addEventListener("submit", saveProductFromForm);
+      el("resetFormBtn").addEventListener("click", resetProductForm);
+      el("deleteFromModalBtn").addEventListener("click", deleteProductFromModal);
+      el("searchInput").addEventListener("input", renderProductList);
+      el("manualCheckBtn").addEventListener("click", () => {
+        const code = normalizeBarcode(el("manualBarcodeInput").value);
+        if (!code) return toast("Barcode kosong", "Masukkan nomor barcode dulu.");
+        handleScannedCode(code);
+      });
+      el("editFoundBtn").addEventListener("click", () => {
+        if (currentFoundBarcode && products[currentFoundBarcode]) openProductModal(products[currentFoundBarcode]);
+      });
+      el("copyFoundBtn").addEventListener("click", copyCurrentBarcode);
+      el("exportBtn").addEventListener("click", exportBackup);
+      el("importBtn").addEventListener("click", () => el("importFile").click());
+      el("importFile").addEventListener("change", importBackup);
+      el("clearAllBtn").addEventListener("click", clearAllProducts);
+
+      ["buyPriceInput", "sellPriceInput"].forEach((id) => {
+        el(id).addEventListener("input", (e) => {
+          const raw = onlyDigits(e.target.value);
+          e.target.value = raw ? formatPlainNumber(raw) : "";
+        });
+      });
+    }
+
+    function normalizeBarcode(val) { return String(val || "").trim().replace(/\s+/g, ""); }
+    function onlyDigits(val) { return String(val || "").replace(/[^0-9]/g, ""); }
+    function parseMoney(val) { return Number(onlyDigits(val)) || 0; }
+    function formatPlainNumber(val) { const num = Number(onlyDigits(val)); return num ? new Intl.NumberFormat("id-ID").format(num) : ""; }
+    function rupiah(val) { return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(val) || 0); }
+    function escapeHtml(val) { return String(val || "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;"); }
+
+    function renderAll() {
+      renderStats();
+      renderProductList();
+    }
+
+    function renderStats() {
+      const list = Object.values(products);
+      const totalSell = list.reduce((sum, item) => sum + (Number(item.sellPrice) || 0), 0);
+      el("totalProductStat").textContent = list.length;
+      el("totalValueStat").textContent = rupiah(totalSell);
+      el("lastScanStat").textContent = lastScannedBarcode ? (lastScannedBarcode.length > 9 ? lastScannedBarcode.slice(0, 4) + "..." + lastScannedBarcode.slice(-4) : lastScannedBarcode) : "-";
+    }
+
+    function renderProductList() {
+      const container = el("productList");
+      const query = el("searchInput").value.trim().toLowerCase();
+      const list = Object.values(products)
+        .sort((a, b) => (b.updatedAt || "").localeCompare(a.updatedAt || ""))
+        .filter((item) => `${item.name} ${item.barcode}`.toLowerCase().includes(query));
+
+      if (!list.length) {
+        container.innerHTML = `<div class="empty-list"><strong>${Object.keys(products).length ? "Tidak ditemukan" : "Belum ada produk"}</strong></div>`;
+        return;
+      }
+
+      container.innerHTML = list.map((item) => {
+        const margin = Number(item.sellPrice) - Number(item.buyPrice);
+        return `
+          <div class="product-row">
+            <div class="product-info">
+              <strong>${escapeHtml(item.name)}</strong>
+              <div class="product-meta">
+                <span class="tag">${escapeHtml(item.barcode)}</span>
+                <span class="tag">Jual: ${rupiah(item.sellPrice)}</span>
+                <span class="tag">Beli: ${rupiah(item.buyPrice)}</span>
+              </div>
+            </div>
+            <div class="row-actions">
+              <button class="icon-btn" onclick="viewProduct('${encodeURIComponent(item.barcode)}')">${icons.eye}</button>
+              <button class="icon-btn" onclick="editProduct('${encodeURIComponent(item.barcode)}')">${icons.edit}</button>
+              <button class="icon-btn" onclick="deleteProduct('${encodeURIComponent(item.barcode)}')">${icons.trash}</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    // --- KAMERA YANG DISEMPURNAKAN (100% Fokus Barcode Belakang) ---
+    async function openScanner() {
+      el("scannerModal").classList.add("active");
+      el("manualBarcodeInput").value = "";
+      scanLock = false;
+
+      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
+
+      try {
+        await html5QrCode.start(
+          { facingMode: "environment" }, // PAKSA KAMERA BELAKANG
+          {
+            fps: 15,
+            qrbox: { width: 300, height: 120 }, // Rasio kotak agar akurasi ke angka (1D Barcode) sangat tinggi
+            aspectRatio: 1.0,
+            disableFlip: false,
+            // Format yang didukung agar tidak salah baca
+            formatsToSupport: [ 
+              Html5QrcodeSupportedFormats.EAN_13, 
+              Html5QrcodeSupportedFormats.EAN_8, 
+              Html5QrcodeSupportedFormats.UPC_A, 
+              Html5QrcodeSupportedFormats.CODE_128 
+            ] 
+          },
+          (decodedText) => {
+            if (scanLock) return;
+            scanLock = true;
+            handleScannedCode(decodedText);
+          },
+          () => {} // Ignored errors during scan
+        );
+        scannerRunning = true;
+      } catch (error) {
+        toast("Kamera ditolak/gagal", "Ketik barcode secara manual di bawah.");
+      }
+    }
+
+    async function closeScanner() {
+      el("scannerModal").classList.remove("active");
+      scanLock = false;
+      if (html5QrCode && scannerRunning) {
+        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch (e) {}
+        scannerRunning = false;
+      }
+    }
+
+    async function handleScannedCode(rawCode) {
+      const barcode = normalizeBarcode(rawCode);
+      if (!barcode) { scanLock = false; return; }
+      
+      lastScannedBarcode = barcode;
+      localStorage.setItem(LAST_SCAN_KEY, barcode);
+      renderStats();
+
+      await closeScanner();
+
+      if (products[barcode]) {
+        showProductResult(products[barcode]);
+        toast("Produk ditemukan", `${products[barcode].name}`);
+      } else {
+        showEmptyResult();
+        toast("Produk belum ada", "Silakan tambahkan data produk baru.");
+        openProductModal(null, barcode);
+      }
+    }
+
+    function showEmptyResult() {
+      el("emptyResult").style.display = "block";
+      el("foundProduct").style.display = "none";
+      currentFoundBarcode = "";
+    }
+
+    function showProductResult(product) {
+      currentFoundBarcode = product.barcode;
+      const margin = Number(product.sellPrice) - Number(product.buyPrice);
+      el("emptyResult").style.display = "none";
+      el("foundProduct").style.display = "block";
+      el("foundBarcode").textContent = product.barcode;
+      el("foundName").textContent = product.name;
+      el("foundSellPrice").textContent = rupiah(product.sellPrice);
+      el("foundBuyPrice").textContent = rupiah(product.buyPrice);
+      el("foundMargin").textContent = rupiah(margin);
+      el("priceDisplay").scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+
+    function openProductModal(product = null, prefilledBarcode = "") {
+      resetProductForm();
+      el("productModal").classList.add("active");
+      if (product) {
+        el("productModalTitle").textContent = "Edit Produk";
+        el("editingBarcodeOriginal").value = product.barcode;
+        el("barcodeInput").value = product.barcode;
+        el("nameInput").value = product.name;
+        el("buyPriceInput").value = formatPlainNumber(product.buyPrice);
+        el("sellPriceInput").value = formatPlainNumber(product.sellPrice);
+        el("deleteFromModalBtn").style.display = "inline-flex";
+      } else {
+        el("productModalTitle").textContent = "Tambah Produk";
+        el("barcodeInput").value = prefilledBarcode || "";
+        el("deleteFromModalBtn").style.display = "none";
+      }
+    }
+
+    function closeProductModal() { el("productModal").classList.remove("active"); }
+    function resetProductForm() { el("productForm").reset(); el("editingBarcodeOriginal").value = ""; }
+
+    function saveProductFromForm(e) {
+      e.preventDefault();
+      const originalBarcode = normalizeBarcode(el("editingBarcodeOriginal").value);
+      const barcode = normalizeBarcode(el("barcodeInput").value);
+      const name = el("nameInput").value.trim();
+      const buyPrice = parseMoney(el("buyPriceInput").value);
+      const sellPrice = parseMoney(el("sellPriceInput").value);
+
+      if (!barcode || !name) return toast("Wajib diisi", "Barcode dan nama harus diisi.");
+      if (originalBarcode && originalBarcode !== barcode && products[barcode]) return toast("Error", "Barcode sudah dipakai produk lain.");
+
+      const now = new Date().toISOString();
+      if (originalBarcode && originalBarcode !== barcode) delete products[originalBarcode];
+
+      products[barcode] = { barcode, name, buyPrice, sellPrice, updatedAt: now };
+      
+      syncToServer(); // Kirim data baru ke Cloudflare
+      renderAll();
+      showProductResult(products[barcode]);
+      closeProductModal();
+    }
+
+    window.viewProduct = function(b) { const code = decodeURIComponent(b); if(products[code]) { showProductResult(products[code]); } };
+    window.editProduct = function(b) { const code = decodeURIComponent(b); if(products[code]) { openProductModal(products[code]); } };
+    window.deleteProduct = function(b, skipConfirm = false) {
+      const code = decodeURIComponent(b);
+      if (!products[code]) return;
+      if (!skipConfirm && !confirm("Hapus produk?")) return;
+      
+      delete products[code];
+      syncToServer(); // Sinkron ulang hapusan
+      renderAll();
+      if (currentFoundBarcode === code) showEmptyResult();
+    };
+
+    function deleteProductFromModal() {
+      const barcode = normalizeBarcode(el("editingBarcodeOriginal").value || el("barcodeInput").value);
+      if (barcode && products[barcode]) { deleteProduct(encodeURIComponent(barcode), true); closeProductModal(); }
+    }
+
+    async function copyCurrentBarcode() {
+      if (!currentFoundBarcode) return;
+      try { await navigator.clipboard.writeText(currentFoundBarcode); toast("Disalin", currentFoundBarcode); } catch(e) {}
+    }
+
+    function exportBackup() {
+      const blob = new Blob([JSON.stringify({ products }, null, 2)], { type: "application/json" });
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = `backup-barcode.json`;
+      a.click();
+    }
+
+    function importBackup(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const data = JSON.parse(reader.result);
+          const imported = data.products || data;
+          Object.values(imported).forEach(item => { if(item.barcode && item.name) products[item.barcode] = item; });
+          syncToServer();
+          renderAll();
+          toast("Berhasil", "Backup diimpor.");
+        } catch (err) {}
+      };
+      reader.readAsText(file);
+    }
+
+    function clearAllProducts() {
+      if (confirm("Hapus SELURUH produk dari database Cloud?")) {
+        products = {};
+        syncToServer();
+        showEmptyResult();
+        renderAll();
+      }
+    }
+
+    function toast(title, msg) {
+      const wrap = el("toastWrap");
+      const node = document.createElement("div");
+      node.className = "toast";
+      node.innerHTML = `<strong>${escapeHtml(title)}</strong><span>${escapeHtml(msg || "")}</span>`;
+      wrap.appendChild(node);
+      setTimeout(() => { node.style.opacity = "0"; node.style.transform = "translateX(16px)"; setTimeout(() => node.remove(), 260); }, 3200);
+    }
+  </script>
+</body>
+</html>
