@@ -511,178 +511,48 @@ function confirmStableBarcode(decodedText) {
 }
 
 
-// --- GANTI FUNCTION openScanner KAMU DENGAN INI ---
 async function openScanner() {
-  el("scannerModal").classList.add("active");
-  el("manualBarcodeInput").value = "";
-  scanLock = false;
-  resetScanCandidate();
+      el("scannerModal").classList.add("active");
+      el("manualBarcodeInput").value = "";
+      scanLock = false;
 
-  if (!window.Html5Qrcode) {
-    toast("Scanner gagal dimuat", "Library scanner belum terbaca. Cek koneksi internet/CDN.");
-    return;
-  }
+      if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
 
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    toast("Kamera tidak didukung", "Gunakan Chrome/Edge terbaru dan buka lewat HTTPS.");
-    return;
-  }
-
-  if (!html5QrCode) {
-    html5QrCode = new Html5Qrcode("reader", {
-      verbose: false,
-      formatsToSupport: [
-        Html5QrcodeSupportedFormats.EAN_13,
-        Html5QrcodeSupportedFormats.EAN_8,
-        Html5QrcodeSupportedFormats.UPC_A,
-        Html5QrcodeSupportedFormats.UPC_E
-      ],
-      useBarCodeDetectorIfSupported: true
-    });
-  }
-
-  try {
-    // Kalau scanner masih nyala, stop dulu biar tidak bentrok
-    if (scannerRunning) {
       try {
-        await html5QrCode.stop();
-        await html5QrCode.clear();
-      } catch (_) {}
-      scannerRunning = false;
-    }
+        await html5QrCode.start(
+          { facingMode: "environment" }, 
+          {
+            fps: 10,
+            // AREA SCAN DIBUAT SANGAT TIPIS (Tinggi cuma 45px)
+            // Ini memaksa kamera hanya melihat garis barcode, tulisan di atas/bawah/samping bakal ke-potong
+            qrbox: { width: 250, height: 45 }, 
+            aspectRatio: 1.0,
+            // Kunci hanya format barcode barang toko
+            formatsToSupport: [ 
+              Html5QrcodeSupportedFormats.EAN_13, 
+              Html5QrcodeSupportedFormats.EAN_8, 
+              Html5QrcodeSupportedFormats.UPC_A
+            ],
+            experimentalFeatures: {
+              useBarCodeDetectorIfSupported: true 
+            }
+          },
+          (decodedText) => {
+            // VALIDASI: Barcode produk (EAN13) harus berupa angka. 
+            // Jika ada campuran huruf (dari tulisan DEC25), abaikan.
+            if (!/^\d+$/.test(decodedText)) return; 
 
-    let selectedCameraId = null;
-
-    try {
-      const cameras = await Html5Qrcode.getCameras();
-
-      if (cameras && cameras.length) {
-        const backCamera =
-          cameras.find(cam => /back|rear|environment|belakang|kamera belakang/i.test(cam.label)) ||
-          cameras[cameras.length - 1];
-
-        selectedCameraId = backCamera.id;
+            if (scanLock) return;
+            scanLock = true;
+            handleScannedCode(decodedText);
+          },
+          () => {} 
+        );
+        scannerRunning = true;
+      } catch (error) {
+        toast("Kamera gagal", "Gunakan input manual.");
       }
-    } catch (_) {
-      selectedCameraId = null;
     }
-
-    const cameraConfig = selectedCameraId
-      ? {
-          deviceId: { exact: selectedCameraId },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 30 },
-          advanced: [
-            { focusMode: "continuous" },
-            { exposureMode: "continuous" }
-          ]
-        }
-      : {
-          facingMode: { ideal: "environment" },
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-          frameRate: { ideal: 30 },
-          advanced: [
-            { focusMode: "continuous" },
-            { exposureMode: "continuous" }
-          ]
-        };
-
-    await html5QrCode.start(
-      cameraConfig,
-      {
-        fps: 15,
-        disableFlip: true,
-
-        // Kotak dibuat lebar, tidak terlalu pipih.
-        // Barcode kecil butuh area cukup agar garis barcode tidak kepotong.
-        qrbox: function(viewfinderWidth, viewfinderHeight) {
-          const width = Math.floor(Math.min(viewfinderWidth * 0.92, 560));
-          const height = Math.floor(Math.max(95, Math.min(width * 0.34, 155)));
-
-          return {
-            width,
-            height
-          };
-        },
-
-        aspectRatio: 16 / 9,
-
-        formatsToSupport: [
-          Html5QrcodeSupportedFormats.EAN_13,
-          Html5QrcodeSupportedFormats.EAN_8,
-          Html5QrcodeSupportedFormats.UPC_A,
-          Html5QrcodeSupportedFormats.UPC_E
-        ],
-
-        experimentalFeatures: {
-          useBarCodeDetectorIfSupported: true
-        }
-      },
-
-      function(decodedText) {
-        if (scanLock) return;
-
-        const finalBarcode = confirmStableBarcode(decodedText);
-
-        // Belum lolos validasi / belum terbaca sama 3x
-        if (!finalBarcode) return;
-
-        scanLock = true;
-        handleScannedCode(finalBarcode);
-      },
-
-      function() {
-        // Error saat kamera mencari barcode sengaja diabaikan agar tidak spam
-      }
-    );
-
-    scannerRunning = true;
-    toast("Scanner aktif", "Arahkan barcode tepat di kotak. Tahan sebentar sampai terbaca stabil.");
-
-  } catch (error) {
-    console.error(error);
-
-    // Fallback ringan kalau HP/browser tidak kuat resolusi tinggi
-    try {
-      await html5QrCode.start(
-        { facingMode: "environment" },
-        {
-          fps: 12,
-          disableFlip: true,
-          qrbox: { width: 320, height: 120 },
-          formatsToSupport: [
-            Html5QrcodeSupportedFormats.EAN_13,
-            Html5QrcodeSupportedFormats.EAN_8,
-            Html5QrcodeSupportedFormats.UPC_A,
-            Html5QrcodeSupportedFormats.UPC_E
-          ],
-          experimentalFeatures: {
-            useBarCodeDetectorIfSupported: true
-          }
-        },
-        function(decodedText) {
-          if (scanLock) return;
-
-          const finalBarcode = confirmStableBarcode(decodedText);
-          if (!finalBarcode) return;
-
-          scanLock = true;
-          handleScannedCode(finalBarcode);
-        },
-        function() {}
-      );
-
-      scannerRunning = true;
-      toast("Scanner mode aman aktif", "Mode fallback dipakai. Dekatkan barcode pelan-pelan.");
-
-    } catch (fallbackError) {
-      console.error(fallbackError);
-      toast("Kamera ditolak/gagal", "Ketik barcode secara manual di bawah.");
-    }
-  }
-}
 
     async function closeScanner() {
       el("scannerModal").classList.remove("active");
