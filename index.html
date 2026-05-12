@@ -398,7 +398,7 @@
       }).join("");
     }
 
-    // --- KAMERA YANG DISEMPURNAKAN (100% Fokus Barcode Belakang) ---
+// --- VERSI PROFESOR: ANTI-SALAH SCAN & ULTRA-ACCURACY ---
     async function openScanner() {
       el("scannerModal").classList.add("active");
       el("manualBarcodeInput").value = "";
@@ -408,30 +408,47 @@
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" }, // PAKSA KAMERA BELAKANG
+          { facingMode: "environment" }, 
           {
-            fps: 15,
-            qrbox: { width: 300, height: 120 }, // Rasio kotak agar akurasi ke angka (1D Barcode) sangat tinggi
+            fps: 20, // Lebih tinggi agar lebih responsif menangkap gambar
+            // KOTAK SCAN DIBUAT SUPER TIPIS (Silet Mode)
+            // Ini memaksa kamera hanya fokus pada garis barcode. 
+            // Angka tanggal di atas/bawah barcode otomatis terpotong (tidak masuk area scan).
+            qrbox: { width: 250, height: 40 }, 
             aspectRatio: 1.0,
-            disableFlip: false,
-            // Format yang didukung agar tidak salah baca
+            disableFlip: true,
+            // Fokus hanya pada format barang toko agar tidak bingung baca teks/QR
             formatsToSupport: [ 
               Html5QrcodeSupportedFormats.EAN_13, 
               Html5QrcodeSupportedFormats.EAN_8, 
-              Html5QrcodeSupportedFormats.UPC_A, 
-              Html5QrcodeSupportedFormats.CODE_128 
-            ] 
+              Html5QrcodeSupportedFormats.UPC_A
+            ],
+            // AKTIFKAN FITUR EXPERIMENTAL (Meminjam tenaga AI bawaan HP)
+            experimentalFeatures: {
+              useBarCodeDetectorIfSupported: true 
+            }
           },
           (decodedText) => {
+            const code = decodedText.trim();
+
+            // --- SATPAM VALIDASI (Filter Profesor) ---
+            // 1. Barcode toko HARUS angka semua. Kalau ada huruf, abaikan.
+            if (!/^\d+$/.test(code)) return; 
+
+            // 2. Barcode toko harus punya panjang standar (8, 12, atau 13 digit).
+            // Kalau terbaca 5 digit atau 15 digit (karena campur tanggal), otomatis REJECT.
+            const validLengths = [8, 12, 13];
+            if (!validLengths.includes(code.length)) return;
+
             if (scanLock) return;
             scanLock = true;
-            handleScannedCode(decodedText);
+            handleScannedCode(code);
           },
-          () => {} // Ignored errors during scan
+          () => {} 
         );
         scannerRunning = true;
       } catch (error) {
-        toast("Kamera ditolak/gagal", "Ketik barcode secara manual di bawah.");
+        toast("Kamera Gagal", "Gunakan input manual di bawah.");
       }
     }
 
