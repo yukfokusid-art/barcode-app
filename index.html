@@ -398,7 +398,7 @@
       }).join("");
     }
 
-// --- VERSI PROFESOR: ANTI-SALAH SCAN & ULTRA-ACCURACY ---
+// --- VERSI PROFESOR: SUPER SILET MODE (Tinggi 30px) ---
     async function openScanner() {
       el("scannerModal").classList.add("active");
       el("manualBarcodeInput").value = "";
@@ -410,20 +410,17 @@
         await html5QrCode.start(
           { facingMode: "environment" }, 
           {
-            fps: 20, // Lebih tinggi agar lebih responsif menangkap gambar
-            // KOTAK SCAN DIBUAT SUPER TIPIS (Silet Mode)
-            // Ini memaksa kamera hanya fokus pada garis barcode. 
-            // Angka tanggal di atas/bawah barcode otomatis terpotong (tidak masuk area scan).
-            qrbox: { width: 250, height: 40 }, 
+            fps: 20,
+            // TINGGI DIPERSEMPIT LAGI (30px): Benar-benar fokus ke garis tengah barcode.
+            qrbox: { width: 250, height: 30 }, 
             aspectRatio: 1.0,
             disableFlip: true,
-            // Fokus hanya pada format barang toko agar tidak bingung baca teks/QR
             formatsToSupport: [ 
               Html5QrcodeSupportedFormats.EAN_13, 
               Html5QrcodeSupportedFormats.EAN_8, 
               Html5QrcodeSupportedFormats.UPC_A
             ],
-            // AKTIFKAN FITUR EXPERIMENTAL (Meminjam tenaga AI bawaan HP)
+            // TETAP AKTIFKAN FITUR EXPERIMENTAL
             experimentalFeatures: {
               useBarCodeDetectorIfSupported: true 
             }
@@ -431,13 +428,10 @@
           (decodedText) => {
             const code = decodedText.trim();
 
-            // --- SATPAM VALIDASI (Filter Profesor) ---
-            // 1. Barcode toko HARUS angka semua. Kalau ada huruf, abaikan.
-            if (!/^\d+$/.test(code)) return; 
-
-            // 2. Barcode toko harus punya panjang standar (8, 12, atau 13 digit).
-            // Kalau terbaca 5 digit atau 15 digit (karena campur tanggal), otomatis REJECT.
-            const validLengths = [8, 12, 13];
+            // SATPAM VALIDASI TETAP DIJAGA
+            if (!/^\d+$/.test(code)) return; // Harus angka (bukan DEC/EXP)
+            
+            const validLengths = [8, 12, 13]; // Harus panjang standar produk
             if (!validLengths.includes(code.length)) return;
 
             if (scanLock) return;
@@ -448,7 +442,7 @@
         );
         scannerRunning = true;
       } catch (error) {
-        toast("Kamera Gagal", "Gunakan input manual di bawah.");
+        toast("Kamera Gagal", "Gunakan input manual.");
       }
     }
 
