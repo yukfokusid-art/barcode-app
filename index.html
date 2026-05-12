@@ -398,120 +398,8 @@
       }).join("");
     }
 
-// --- KAMERA BARCODE SUPER AKURAT UNTUK PRODUK KECIL / KOMIK ---
-// Tempel helper ini di atas function openScanner()
-
-const SCAN_CONFIRM_NEEDED = 3; // makin besar makin akurat, tapi sedikit lebih lambat
-let scanCandidate = "";
-let scanCandidateCount = 0;
-let scanCandidateTimer = null;
-
-function resetScanCandidate() {
-  scanCandidate = "";
-  scanCandidateCount = 0;
-  if (scanCandidateTimer) clearTimeout(scanCandidateTimer);
-  scanCandidateTimer = null;
-}
-
-function normalizeBarcodeOnlyNumber(value) {
-  return String(value || "").replace(/[^0-9]/g, "").trim();
-}
-
-function calcBarcodeCheckDigit(numberWithoutCheckDigit) {
-  const digits = String(numberWithoutCheckDigit).split("").map(Number);
-  let sum = 0;
-
-  // Standar EAN/UPC: hitung dari kanan, bobot 3 lalu 1 bergantian
-  for (let i = digits.length - 1, pos = 0; i >= 0; i--, pos++) {
-    sum += digits[i] * (pos % 2 === 0 ? 3 : 1);
-  }
-
-  return (10 - (sum % 10)) % 10;
-}
-
-function hasValidCheckDigit(code) {
-  if (!/^\d+$/.test(code)) return false;
-  if (![8, 12, 13].includes(code.length)) return false;
-
-  const body = code.slice(0, -1);
-  const check = Number(code.slice(-1));
-  return calcBarcodeCheckDigit(body) === check;
-}
-
-function expandUpcEToUpcA(upcE) {
-  // UPC-E format: NS + 6 digit + check digit = 8 digit
-  if (!/^\d{8}$/.test(upcE)) return "";
-
-  const ns = upcE[0];
-  const d1 = upcE[1];
-  const d2 = upcE[2];
-  const d3 = upcE[3];
-  const d4 = upcE[4];
-  const d5 = upcE[5];
-  const d6 = upcE[6];
-  const check = upcE[7];
-
-  let upcAWithoutCheck = "";
-
-  if (["0", "1", "2"].includes(d6)) {
-    upcAWithoutCheck = ns + d1 + d2 + d6 + "0000" + d3 + d4 + d5;
-  } else if (d6 === "3") {
-    upcAWithoutCheck = ns + d1 + d2 + d3 + "00000" + d4 + d5;
-  } else if (d6 === "4") {
-    upcAWithoutCheck = ns + d1 + d2 + d3 + d4 + "00000" + d5;
-  } else {
-    upcAWithoutCheck = ns + d1 + d2 + d3 + d4 + d5 + "0000" + d6;
-  }
-
-  return upcAWithoutCheck + check;
-}
-
-function isValidProductBarcode(code) {
-  if (!/^\d+$/.test(code)) return false;
-
-  // EAN-13, UPC-A, EAN-8
-  if ([13, 12, 8].includes(code.length) && hasValidCheckDigit(code)) {
-    return true;
-  }
-
-  // UPC-E juga 8 digit, tapi rumus check digit-nya lewat ekspansi ke UPC-A
-  if (code.length === 8) {
-    const upcA = expandUpcEToUpcA(code);
-    return upcA.length === 12 && hasValidCheckDigit(upcA);
-  }
-
-  return false;
-}
-
-function confirmStableBarcode(decodedText) {
-  const code = normalizeBarcodeOnlyNumber(decodedText);
-
-  // Tolak hasil aneh, angka kependekan, atau angka yang check digit-nya salah
-  if (!isValidProductBarcode(code)) {
-    return null;
-  }
-
-  if (code === scanCandidate) {
-    scanCandidateCount++;
-  } else {
-    scanCandidate = code;
-    scanCandidateCount = 1;
-  }
-
-  if (scanCandidateTimer) clearTimeout(scanCandidateTimer);
-  scanCandidateTimer = setTimeout(resetScanCandidate, 1800);
-
-  if (scanCandidateCount >= SCAN_CONFIRM_NEEDED) {
-    const finalCode = scanCandidate;
-    resetScanCandidate();
-    return finalCode;
-  }
-
-  return null;
-}
-
-
-async function openScanner() {
+    // --- KAMERA YANG DISEMPURNAKAN (100% Fokus Barcode Belakang) ---
+    async function openScanner() {
       el("scannerModal").classList.add("active");
       el("manualBarcodeInput").value = "";
       scanLock = false;
@@ -520,37 +408,30 @@ async function openScanner() {
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" }, 
+          { facingMode: "environment" }, // PAKSA KAMERA BELAKANG
           {
-            fps: 10,
-            // AREA SCAN DIBUAT SANGAT TIPIS (Tinggi cuma 45px)
-            // Ini memaksa kamera hanya melihat garis barcode, tulisan di atas/bawah/samping bakal ke-potong
-            qrbox: { width: 250, height: 45 }, 
+            fps: 15,
+            qrbox: { width: 300, height: 120 }, // Rasio kotak agar akurasi ke angka (1D Barcode) sangat tinggi
             aspectRatio: 1.0,
-            // Kunci hanya format barcode barang toko
+            disableFlip: false,
+            // Format yang didukung agar tidak salah baca
             formatsToSupport: [ 
               Html5QrcodeSupportedFormats.EAN_13, 
               Html5QrcodeSupportedFormats.EAN_8, 
-              Html5QrcodeSupportedFormats.UPC_A
-            ],
-            experimentalFeatures: {
-              useBarCodeDetectorIfSupported: true 
-            }
+              Html5QrcodeSupportedFormats.UPC_A, 
+              Html5QrcodeSupportedFormats.CODE_128 
+            ] 
           },
           (decodedText) => {
-            // VALIDASI: Barcode produk (EAN13) harus berupa angka. 
-            // Jika ada campuran huruf (dari tulisan DEC25), abaikan.
-            if (!/^\d+$/.test(decodedText)) return; 
-
             if (scanLock) return;
             scanLock = true;
             handleScannedCode(decodedText);
           },
-          () => {} 
+          () => {} // Ignored errors during scan
         );
         scannerRunning = true;
       } catch (error) {
-        toast("Kamera gagal", "Gunakan input manual.");
+        toast("Kamera ditolak/gagal", "Ketik barcode secara manual di bawah.");
       }
     }
 
