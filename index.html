@@ -397,8 +397,8 @@
         `;
       }).join("");
     }
-    
-// --- VERSI FINAL: ULTRA-ACCURACY + EXPERIMENTAL ON ---
+
+// --- KAMERA YANG DISEMPURNAKAN (100% Fokus Barcode Belakang) ---
     async function openScanner() {
       el("scannerModal").classList.add("active");
       el("manualBarcodeInput").value = "";
@@ -408,49 +408,45 @@
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" }, 
+          { facingMode: "environment" }, // PAKSA KAMERA BELAKANG
           {
-            fps: 15, // FPS dinaikkan agar fitur experimental lebih cepat menangkap gambar
-            // AREA SCAN SUPER TIPIS (Tinggi 35px): 
-            // Benar-benar memotong teks DEC27 agar tidak masuk ke sensor
-            qrbox: { width: 250, height: 35 }, 
-            aspectRatio: 1.0,
-            disableFlip: true,
-            // Fokus hanya pada format barang toko
+            fps: 10, // Diturunkan sedikit agar mesin punya waktu menganalisis frame blur
+            qrbox: { width: 260, height: 75 }, // KOTAK SUPER PIPIH: Cegah tulisan DEC25 ikut masuk
+            disableFlip: true, // Hemat RAM HP
+            // Format wajib produk warung/toko, larang format aneh-aneh
             formatsToSupport: [ 
               Html5QrcodeSupportedFormats.EAN_13, 
               Html5QrcodeSupportedFormats.EAN_8, 
-              Html5QrcodeSupportedFormats.UPC_A
+              Html5QrcodeSupportedFormats.UPC_A,
+              Html5QrcodeSupportedFormats.UPC_E
             ],
-            // --- FITUR EXPERIMENTAL DI AKTIFKAN ---
-            // Ini akan meminjam mesin scanner bawaan HP (Google/Apple) jika tersedia
+            // SENJATA UTAMA: Pakai scanner native HP Android kalau ada (Jauh lebih akurat)
             experimentalFeatures: {
               useBarCodeDetectorIfSupported: true 
             }
           },
           (decodedText) => {
-            const code = decodedText.trim();
-
-            // 1. Validasi Karakter: Harus angka saja (buang kalau ada huruf)
-            if (!/^\d+$/.test(code)) return; 
-
-            // 2. Validasi Panjang: Wajib 8, 12, atau 13 digit.
-            // Ini kunci agar angka '7' dari DEC27 tidak nempel di belakang barcode
-            const validLengths = [8, 12, 13];
-            if (!validLengths.includes(code.length)) return;
-
             if (scanLock) return;
             scanLock = true;
-            handleScannedCode(code);
+            handleScannedCode(decodedText);
           },
-          () => {} 
+          () => {} // Abaikan error kalau lagi nyari fokus
         );
         scannerRunning = true;
       } catch (error) {
-        toast("Kamera gagal", "Gunakan input manual.");
+        toast("Kamera ditolak/gagal", "Ketik barcode secara manual di bawah.");
       }
     }
-    
+
+    async function closeScanner() {
+      el("scannerModal").classList.remove("active");
+      scanLock = false;
+      if (html5QrCode && scannerRunning) {
+        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch (e) {}
+        scannerRunning = false;
+      }
+    }
+
     async function handleScannedCode(rawCode) {
       const barcode = normalizeBarcode(rawCode);
       if (!barcode) { scanLock = false; return; }
