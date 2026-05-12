@@ -522,12 +522,11 @@ function confirmStableBarcode(decodedText) {
         await html5QrCode.start(
           { facingMode: "environment" }, 
           {
-            fps: 10,
-            // AREA SCAN DIBUAT SANGAT TIPIS (Tinggi cuma 45px)
-            // Ini memaksa kamera hanya melihat garis barcode, tulisan di atas/bawah/samping bakal ke-potong
+            fps: 15,
+            // Tinggi 45px agar pas dengan kotak panduan CSS
             qrbox: { width: 250, height: 45 }, 
             aspectRatio: 1.0,
-            // Kunci hanya format barcode barang toko
+            disableFlip: true,
             formatsToSupport: [ 
               Html5QrcodeSupportedFormats.EAN_13, 
               Html5QrcodeSupportedFormats.EAN_8, 
@@ -538,13 +537,15 @@ function confirmStableBarcode(decodedText) {
             }
           },
           (decodedText) => {
-            // VALIDASI: Barcode produk (EAN13) harus berupa angka. 
-            // Jika ada campuran huruf (dari tulisan DEC25), abaikan.
-            if (!/^\d+$/.test(decodedText)) return; 
+            const code = decodedText.trim();
+            // Filter: Hanya angka dan panjangnya harus 8, 12, atau 13 (Standar Produk)
+            if (!/^\d+$/.test(code)) return; 
+            const validLengths = [8, 12, 13];
+            if (!validLengths.includes(code.length)) return;
 
             if (scanLock) return;
             scanLock = true;
-            handleScannedCode(decodedText);
+            handleScannedCode(code);
           },
           () => {} 
         );
@@ -553,15 +554,6 @@ function confirmStableBarcode(decodedText) {
         toast("Kamera gagal", "Gunakan input manual.");
       }
     }
-    async function closeScanner() {
-      el("scannerModal").classList.remove("active");
-      scanLock = false;
-      if (html5QrCode && scannerRunning) {
-        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch (e) {}
-        scannerRunning = false;
-      }
-    }
-
     async function handleScannedCode(rawCode) {
       const barcode = normalizeBarcode(rawCode);
       if (!barcode) { scanLock = false; return; }
