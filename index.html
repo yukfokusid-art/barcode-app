@@ -1247,6 +1247,144 @@
         transition-duration: .01ms !important;
       }
     }
+
+    /* MODE SUPER RINGAN UNTUK HP LOW-END */
+    :root {
+      --shadow: 0 8px 24px rgba(0, 0, 0, 0.22);
+    }
+
+    body {
+      background: linear-gradient(145deg, #020617 0%, #08111f 52%, #0f172a 100%) !important;
+    }
+
+    body::before {
+      display: none !important;
+    }
+
+    .card,
+    .auth-card,
+    .topbar-inner,
+    .modal-card,
+    .price-display,
+    .quick-stat,
+    .product-row,
+    .scanner-search-panel,
+    .scan-note,
+    .toast,
+    .input,
+    .pill-btn,
+    .ghost-btn,
+    .tag,
+    .mini-price {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      box-shadow: none !important;
+    }
+
+    .card,
+    .auth-card,
+    .modal-card {
+      background: rgba(15, 23, 42, 0.96) !important;
+    }
+
+    .topbar {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: transparent !important;
+    }
+
+    .topbar-inner,
+    .quick-stat,
+    .product-row,
+    .price-display,
+    .scanner-search-panel,
+    .scan-note,
+    .mini-price {
+      background: rgba(15, 23, 42, 0.72) !important;
+    }
+
+    .modal {
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
+      background: rgba(2, 6, 23, 0.86) !important;
+    }
+
+    .auth-logo,
+    .logo,
+    .primary-btn,
+    .green-btn,
+    .scan-fab,
+    .scanner-search-btn {
+      box-shadow: none !important;
+    }
+
+    .scan-fab::before,
+    #reader::after {
+      display: none !important;
+    }
+
+    #reader::before {
+      box-shadow: none !important;
+      border-color: rgba(56, 189, 248, 0.88) !important;
+    }
+
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.001ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.12s !important;
+      scroll-behavior: auto !important;
+    }
+
+    .product-row:hover,
+    .primary-btn:hover,
+    .ghost-btn:hover,
+    .danger-btn:hover,
+    .green-btn:hover,
+    .pill-btn:hover,
+    .scan-fab:hover,
+    .scanner-search-btn:hover,
+    .icon-btn:hover {
+      transform: none !important;
+    }
+
+    @media (max-width: 560px) {
+      .hero-main h2 {
+        font-size: 34px !important;
+      }
+
+      .hero-main .desc {
+        font-size: 14px !important;
+        line-height: 1.55 !important;
+      }
+
+      .quick-grid {
+        gap: 8px !important;
+        margin-top: 16px !important;
+      }
+
+      .quick-stat,
+      .product-row,
+      .products-card,
+      .result-card,
+      .hero-main,
+      .modal-card {
+        padding: 13px !important;
+      }
+
+      .price-display {
+        min-height: 220px !important;
+      }
+
+      #reader {
+        min-height: 240px !important;
+      }
+
+      .scan-fab {
+        min-height: 58px !important;
+      }
+    }
   </style>
 </head>
 <body>
