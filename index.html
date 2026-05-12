@@ -965,6 +965,25 @@
         padding-bottom: calc(112px + var(--safe-bottom));
       }
 
+      .modal {
+        align-items: flex-start;
+        justify-content: center;
+        min-height: 100dvh;
+        height: 100dvh;
+        overflow-y: auto;
+        padding: max(12px, env(safe-area-inset-top, 0px)) 10px max(12px, env(safe-area-inset-bottom, 0px));
+      }
+
+      .modal-card {
+        margin: auto 0;
+        max-height: none;
+        overflow: visible;
+      }
+
+      #scannerModal .modal-card {
+        overflow: visible;
+      }
+
       .app {
         width: min(100% - 22px, 1120px);
         padding-top: 12px;
@@ -1011,24 +1030,22 @@
         font-size: 14px;
       }
 
-      .modal {
-        align-items: flex-end;
-        padding: 10px;
-      }
-
       .modal-card {
         border-radius: 26px;
         width: 100%;
-        max-height: calc(100vh - 20px);
       }
 
       #reader {
-        min-height: 330px;
+        min-height: clamp(250px, 48dvh, 330px);
       }
 
       .scanner-help,
       .auth-helper {
         grid-template-columns: 1fr;
+      }
+
+      .scanner-help span {
+        padding: 9px 10px;
       }
 
       .toast-stack {
@@ -1326,16 +1343,34 @@
     }
 
     // --- SCANNER WITH TYPE-SEARCH ---
+    function findProductByNameKeyword(keyword) {
+      const q = String(keyword || "").toLowerCase().trim();
+      if(q.length < 1) return null;
+      const list = Object.values(products || {});
+      return list.find(p => String(p.name || "").toLowerCase() === q)
+        || list.find(p => String(p.name || "").toLowerCase().startsWith(q))
+        || list.find(p => String(p.name || "").toLowerCase().includes(q));
+    }
+
     el("scannerTypeName").oninput = (e) => {
       const q = e.target.value.toLowerCase().trim();
       if(q.length < 2) return;
-      // Cari produk berdasarkan nama saat ngetik di scanner
-      const found = Object.values(products).find(p => String(p.name || "").toLowerCase().includes(q));
+      const found = findProductByNameKeyword(q);
       if(found) {
-        toast("Ditemukan", found.name, "success");
-        handleScannedCode(found.barcode);
+        toast("Produk cocok", `Tekan Enter untuk membuka: ${found.name}`, "success");
       }
     };
+
+    el("scannerTypeName").addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      const found = findProductByNameKeyword(e.target.value);
+      if(found) {
+        handleScannedCode(found.barcode);
+      } else {
+        toast("Tidak ditemukan", "Nama produk belum ada di database.", "error");
+      }
+    });
 
     async function openScanner() {
       el("scannerModal").classList.add("active");
@@ -1547,6 +1582,12 @@
     el("manualCheckBtn").onclick = () => {
       handleScannedCode(el("manualBarcodeInput").value);
     };
+
+    el("manualBarcodeInput").addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      handleScannedCode(el("manualBarcodeInput").value);
+    });
 
     el("editFoundBtn").onclick = () => {
       if (currentFoundBarcode && products[currentFoundBarcode]) openProductModal(products[currentFoundBarcode]);
