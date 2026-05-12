@@ -1401,13 +1401,9 @@
         || list.find(p => String(p.name || "").toLowerCase().includes(q));
     }
 
-    el("scannerTypeName").oninput = (e) => {
-      const q = e.target.value.toLowerCase().trim();
-      if(q.length < 2) return;
-      const found = findProductByNameKeyword(q);
-      if(found) {
-        toast("Produk cocok", `Tekan Enter untuk membuka: ${found.name}`, "success");
-      }
+    el("scannerTypeName").oninput = () => {
+      // Dibiarkan tanpa notifikasi agar saat mengetik di HP tidak menumpuk dan menutupi kamera.
+      // Produk akan dibuka hanya saat tombol Cari diklik atau Enter ditekan.
     };
 
     function searchProductFromScannerName() {
