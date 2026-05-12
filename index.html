@@ -520,36 +520,39 @@ function confirmStableBarcode(decodedText) {
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" }, // PAKSA KAMERA BELAKANG
+          { facingMode: "environment" }, 
           {
-            fps: 10, // Diturunkan sedikit agar mesin punya waktu menganalisis frame blur
-            qrbox: { width: 260, height: 75 }, // KOTAK SUPER PIPIH: Cegah tulisan DEC25 ikut masuk
-            disableFlip: true, // Hemat RAM HP
-            // Format wajib produk warung/toko, larang format aneh-aneh
+            fps: 10,
+            // AREA SCAN DIBUAT SANGAT TIPIS (Tinggi cuma 45px)
+            // Ini memaksa kamera hanya melihat garis barcode, tulisan di atas/bawah/samping bakal ke-potong
+            qrbox: { width: 250, height: 45 }, 
+            aspectRatio: 1.0,
+            // Kunci hanya format barcode barang toko
             formatsToSupport: [ 
               Html5QrcodeSupportedFormats.EAN_13, 
               Html5QrcodeSupportedFormats.EAN_8, 
-              Html5QrcodeSupportedFormats.UPC_A,
-              Html5QrcodeSupportedFormats.UPC_E
+              Html5QrcodeSupportedFormats.UPC_A
             ],
-            // SENJATA UTAMA: Pakai scanner native HP Android kalau ada (Jauh lebih akurat)
             experimentalFeatures: {
               useBarCodeDetectorIfSupported: true 
             }
           },
           (decodedText) => {
+            // VALIDASI: Barcode produk (EAN13) harus berupa angka. 
+            // Jika ada campuran huruf (dari tulisan DEC25), abaikan.
+            if (!/^\d+$/.test(decodedText)) return; 
+
             if (scanLock) return;
             scanLock = true;
             handleScannedCode(decodedText);
           },
-          () => {} // Abaikan error kalau lagi nyari fokus
+          () => {} 
         );
         scannerRunning = true;
       } catch (error) {
-        toast("Kamera ditolak/gagal", "Ketik barcode secara manual di bawah.");
+        toast("Kamera gagal", "Gunakan input manual.");
       }
     }
-
     async function closeScanner() {
       el("scannerModal").classList.remove("active");
       scanLock = false;
