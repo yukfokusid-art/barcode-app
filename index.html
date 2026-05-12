@@ -510,7 +510,7 @@ function confirmStableBarcode(decodedText) {
   return null;
 }
     
-// --- VERSI SUPER FILTER (Anti-Gagal Barcode Rapat) ---
+// --- VERSI ULTRA-ACCURACY (Filter Panjang & Karakter) ---
     async function openScanner() {
       el("scannerModal").classList.add("active");
       el("manualBarcodeInput").value = "";
@@ -522,47 +522,43 @@ function confirmStableBarcode(decodedText) {
         await html5QrCode.start(
           { facingMode: "environment" }, 
           {
-            fps: 10,
-            // AREA SCAN SUPER TIPIS: Memaksa kamera hanya melihat garis barcode saja.
-            // Tulisan DEC25 di samping otomatis terpotong (tidak masuk area scan).
-            qrbox: { width: 250, height: 45 }, 
+            fps: 15,
+            // Kotak dibuat SANGAT GEPENG (35px) agar teks di atas/bawah tidak masuk
+            qrbox: { width: 250, height: 35 }, 
             aspectRatio: 1.0,
             disableFlip: true,
-            // Kunci hanya format barcode produk toko
             formatsToSupport: [ 
               Html5QrcodeSupportedFormats.EAN_13, 
               Html5QrcodeSupportedFormats.EAN_8, 
               Html5QrcodeSupportedFormats.UPC_A
             ],
-            // AKTIFKAN FITUR EXPERIMENTAL (Pinjam mesin scanner native HP)
             experimentalFeatures: {
               useBarCodeDetectorIfSupported: true 
             }
           },
           (decodedText) => {
-            // FILTER ANGKA: Jika hasil scan mengandung huruf (berarti salah baca teks), abaikan!
-            if (!/^\d+$/.test(decodedText)) return; 
+            // --- SATPAM VALIDASI KARAKTER & PANJANG ---
+            const code = decodedText.trim();
+            
+            // 1. Harus angka semua (buang kalau ada huruf DEC)
+            if (!/^\d+$/.test(code)) return; 
+
+            // 2. WAJIB sesuai panjang standar barcode dunia (EAN-13, EAN-8, atau UPC-12)
+            // Kalau si "7" ikut masuk, panjangnya jadi 14, maka akan di-REJECT (DITOLAK) di sini.
+            const validLengths = [8, 12, 13];
+            if (!validLengths.includes(code.length)) return;
 
             if (scanLock) return;
             scanLock = true;
-            handleScannedCode(decodedText);
+            handleScannedCode(code);
           },
           () => {} 
         );
         scannerRunning = true;
       } catch (error) {
-        toast("Kamera gagal", "Gunakan input manual di bawah.");
+        toast("Kamera gagal", "Gunakan input manual.");
       }
     }
-    async function closeScanner() {
-      el("scannerModal").classList.remove("active");
-      scanLock = false;
-      if (html5QrCode && scannerRunning) {
-        try { await html5QrCode.stop(); await html5QrCode.clear(); } catch (e) {}
-        scannerRunning = false;
-      }
-    }
-
     async function handleScannedCode(rawCode) {
       const barcode = normalizeBarcode(rawCode);
       if (!barcode) { scanLock = false; return; }
