@@ -374,6 +374,43 @@
       z-index: 10;
     }
 
+    .scanner-search-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 8px;
+      align-items: center;
+      background: rgba(15, 23, 42, 0.52);
+      border-radius: 20px;
+    }
+
+    .scanner-search-row .input {
+      margin-bottom: 0;
+      min-height: 54px;
+    }
+
+    .scanner-search-btn {
+      min-height: 54px;
+      border: 0;
+      border-radius: 17px;
+      padding: 0 16px;
+      cursor: pointer;
+      font-weight: 950;
+      color: #031927;
+      background: linear-gradient(135deg, var(--blue), #7dd3fc);
+      box-shadow: 0 12px 24px rgba(56, 189, 248, 0.24);
+      transition: transform .18s ease, filter .18s ease;
+      white-space: nowrap;
+    }
+
+    .scanner-search-btn:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.05);
+    }
+
+    .scanner-search-btn:active {
+      transform: scale(.98);
+    }
+
     #reader {
       position: relative;
       border-radius: 22px;
@@ -1048,6 +1085,15 @@
         padding: 9px 10px;
       }
 
+      .scanner-search-row {
+        grid-template-columns: minmax(0, 1fr) 72px;
+        gap: 7px;
+      }
+
+      .scanner-search-btn {
+        padding: 0 10px;
+      }
+
       .toast-stack {
         top: 10px;
         right: 10px;
@@ -1196,7 +1242,10 @@
 
       <div style="position:relative;">
         <div class="scanner-overlay-input">
-          <input type="text" id="scannerTypeName" class="input" placeholder="Atau ketik nama produk di sini..." style="background: rgba(15,23,42,0.92); border: 2px solid var(--blue); margin-bottom:0;">
+          <div class="scanner-search-row">
+            <input type="text" id="scannerTypeName" class="input" placeholder="Ketik nama produk..." style="background: rgba(15,23,42,0.92); border: 2px solid var(--blue); margin-bottom:0;">
+            <button type="button" id="scannerNameSearchBtn" class="scanner-search-btn">Cari</button>
+          </div>
         </div>
         <div id="reader"></div>
       </div>
@@ -1361,15 +1410,19 @@
       }
     };
 
-    el("scannerTypeName").addEventListener("keydown", (e) => {
-      if (e.key !== "Enter") return;
-      e.preventDefault();
-      const found = findProductByNameKeyword(e.target.value);
+    function searchProductFromScannerName() {
+      const found = findProductByNameKeyword(el("scannerTypeName").value);
       if(found) {
         handleScannedCode(found.barcode);
       } else {
         toast("Tidak ditemukan", "Nama produk belum ada di database.", "error");
       }
+    }
+
+    el("scannerTypeName").addEventListener("keydown", (e) => {
+      if (e.key !== "Enter") return;
+      e.preventDefault();
+      searchProductFromScannerName();
     });
 
     async function openScanner() {
@@ -1574,6 +1627,7 @@
     if(currentUser) initApp();
     el("scanBtn").onclick = openScanner;
     el("closeScannerBtn").onclick = closeScanner;
+    el("scannerNameSearchBtn").onclick = searchProductFromScannerName;
     el("addProductBtn").onclick = () => openProductModal();
     el("closeProductBtn").onclick = closeProductModal;
     el("closeProductXBtn").onclick = closeProductModal;
