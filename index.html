@@ -510,7 +510,7 @@ function confirmStableBarcode(decodedText) {
   return null;
 }
     
-    // --- KAMERA YANG DISEMPURNAKAN (100% Fokus Barcode Belakang) ---
+// --- VERSI SUPER FILTER (Anti-Gagal Barcode Rapat) ---
     async function openScanner() {
       el("scannerModal").classList.add("active");
       el("manualBarcodeInput").value = "";
@@ -520,36 +520,40 @@ function confirmStableBarcode(decodedText) {
 
       try {
         await html5QrCode.start(
-          { facingMode: "environment" }, // PAKSA KAMERA BELAKANG
+          { facingMode: "environment" }, 
           {
-            fps: 10, // Diturunkan sedikit agar mesin punya waktu menganalisis frame blur
-            qrbox: { width: 260, height: 75 }, // KOTAK SUPER PIPIH: Cegah tulisan DEC25 ikut masuk
-            disableFlip: true, // Hemat RAM HP
-            // Format wajib produk warung/toko, larang format aneh-aneh
+            fps: 10,
+            // AREA SCAN SUPER TIPIS: Memaksa kamera hanya melihat garis barcode saja.
+            // Tulisan DEC25 di samping otomatis terpotong (tidak masuk area scan).
+            qrbox: { width: 250, height: 45 }, 
+            aspectRatio: 1.0,
+            disableFlip: true,
+            // Kunci hanya format barcode produk toko
             formatsToSupport: [ 
               Html5QrcodeSupportedFormats.EAN_13, 
               Html5QrcodeSupportedFormats.EAN_8, 
-              Html5QrcodeSupportedFormats.UPC_A,
-              Html5QrcodeSupportedFormats.UPC_E
+              Html5QrcodeSupportedFormats.UPC_A
             ],
-            // SENJATA UTAMA: Pakai scanner native HP Android kalau ada (Jauh lebih akurat)
+            // AKTIFKAN FITUR EXPERIMENTAL (Pinjam mesin scanner native HP)
             experimentalFeatures: {
               useBarCodeDetectorIfSupported: true 
             }
           },
           (decodedText) => {
+            // FILTER ANGKA: Jika hasil scan mengandung huruf (berarti salah baca teks), abaikan!
+            if (!/^\d+$/.test(decodedText)) return; 
+
             if (scanLock) return;
             scanLock = true;
             handleScannedCode(decodedText);
           },
-          () => {} // Abaikan error kalau lagi nyari fokus
+          () => {} 
         );
         scannerRunning = true;
       } catch (error) {
-        toast("Kamera ditolak/gagal", "Ketik barcode secara manual di bawah.");
+        toast("Kamera gagal", "Gunakan input manual di bawah.");
       }
     }
-
     async function closeScanner() {
       el("scannerModal").classList.remove("active");
       scanLock = false;
