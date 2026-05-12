@@ -7,114 +7,1186 @@
   <meta name="theme-color" content="#0f172a" />
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <style>
-    /* CSS ASLI DIPERTAHANKAN & DITAMBAH */
+    /* CSS ASLI DIPERTAHANKAN & DIPERCANTIK */
     :root {
-      --bg: #08111f; --bg-2: #0f172a; --card: rgba(15, 23, 42, 0.78); --card-2: rgba(30, 41, 59, 0.78);
-      --text: #f8fafc; --muted: #94a3b8; --line: rgba(148, 163, 184, 0.22);
-      --blue: #38bdf8; --blue-2: #0284c7; --green: #34d399; --yellow: #facc15;
-      --red: #fb7185; --purple: #a78bfa; --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
-      --radius: 24px; --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --bg: #08111f;
+      --bg-2: #0f172a;
+      --card: rgba(15, 23, 42, 0.78);
+      --card-2: rgba(30, 41, 59, 0.78);
+      --text: #f8fafc;
+      --muted: #94a3b8;
+      --line: rgba(148, 163, 184, 0.22);
+      --blue: #38bdf8;
+      --blue-2: #0284c7;
+      --green: #34d399;
+      --yellow: #facc15;
+      --red: #fb7185;
+      --purple: #a78bfa;
+      --shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+      --radius: 24px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+      --glass: rgba(15, 23, 42, 0.66);
+      --glass-strong: rgba(15, 23, 42, 0.9);
+      --ring: rgba(56, 189, 248, 0.35);
     }
-    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { margin: 0; min-height: 100vh; color: var(--text); font-family: Inter, system-ui, sans-serif; background: linear-gradient(145deg, #020617 0%, #08111f 45%, #0f172a 100%); overflow-x: hidden; padding-bottom: calc(118px + var(--safe-bottom)); }
-    
+
+    * {
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.22), transparent 34%),
+        radial-gradient(circle at 80% 10%, rgba(167, 139, 250, 0.24), transparent 30%),
+        radial-gradient(circle at 50% 95%, rgba(52, 211, 153, 0.12), transparent 38%),
+        linear-gradient(145deg, #020617 0%, #08111f 45%, #0f172a 100%);
+      overflow-x: hidden;
+      padding-bottom: calc(118px + var(--safe-bottom));
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      width: 360px;
+      height: 360px;
+      border-radius: 999px;
+      filter: blur(55px);
+      opacity: 0.18;
+      pointer-events: none;
+      z-index: -1;
+      animation: floatBlob 10s ease-in-out infinite alternate;
+    }
+
+    body::before {
+      left: -120px;
+      top: 120px;
+      background: var(--blue);
+    }
+
+    body::after {
+      right: -140px;
+      bottom: 120px;
+      background: var(--purple);
+      animation-delay: -4s;
+    }
+
+    @keyframes floatBlob {
+      from { transform: translate3d(0, 0, 0) scale(1); }
+      to { transform: translate3d(22px, -18px, 0) scale(1.08); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(14px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.97) translateY(10px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    @keyframes scanPulse {
+      0%, 100% { opacity: 0.52; transform: translateY(0); }
+      50% { opacity: 1; transform: translateY(3px); }
+    }
+
+    @keyframes shineMove {
+      from { transform: translateX(-120%); }
+      to { transform: translateX(120%); }
+    }
+
     /* Layout Login */
-    #authScreen { position: fixed; inset: 0; z-index: 1000; background: var(--bg); display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .auth-card { width: min(400px, 100%); background: var(--card); border: 1px solid var(--line); padding: 30px; border-radius: var(--radius); backdrop-filter: blur(20px); }
-    
+    #authScreen {
+      position: fixed;
+      inset: 0;
+      z-index: 1000;
+      background:
+        radial-gradient(circle at top, rgba(56, 189, 248, 0.16), transparent 36%),
+        radial-gradient(circle at bottom right, rgba(167, 139, 250, 0.2), transparent 34%),
+        var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .auth-card {
+      width: min(430px, 100%);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.72));
+      border: 1px solid var(--line);
+      padding: 28px;
+      border-radius: 30px;
+      backdrop-filter: blur(22px);
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+      animation: popIn 0.45s ease both;
+    }
+
+    .auth-card::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 20%, rgba(255,255,255,0.08), transparent 80%);
+      transform: translateX(-120%);
+      animation: shineMove 5.4s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    .auth-logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 20px;
+      display: grid;
+      place-items: center;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      box-shadow: 0 18px 35px rgba(56, 189, 248, 0.2);
+      margin-bottom: 16px;
+      font-size: 26px;
+    }
+
+    .auth-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #bae6fd;
+      border: 1px solid rgba(56, 189, 248, 0.28);
+      background: rgba(14, 165, 233, 0.1);
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: .02em;
+      margin-bottom: 14px;
+    }
+
+    .auth-card h2 {
+      margin: 0 0 8px;
+      font-size: clamp(25px, 5vw, 34px);
+      line-height: 1.05;
+      letter-spacing: -0.04em;
+    }
+
+    .auth-card p {
+      line-height: 1.55;
+    }
+
+    .auth-helper {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 16px 0 18px;
+    }
+
+    .auth-helper div {
+      border: 1px solid var(--line);
+      background: rgba(2, 6, 23, 0.28);
+      border-radius: 18px;
+      padding: 11px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .auth-helper b {
+      display: block;
+      color: var(--text);
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
     /* Utility */
     .hidden { display: none !important; }
-    .app { width: min(1120px, calc(100% - 28px)); margin: 0 auto; padding: 22px 0 0; }
-    .card { border: 1px solid var(--line); background: var(--card); border-radius: var(--radius); padding: 18px; margin-bottom: 18px; backdrop-filter: blur(20px); }
-    .input { width: 100%; min-height: 50px; border-radius: 17px; border: 1px solid var(--line); background: rgba(15, 23, 42, .72); color: var(--text); padding: 0 14px; margin-bottom: 15px; outline: none; }
-    .primary-btn, .green-btn { width: 100%; min-height: 50px; border-radius: 17px; font-weight: bold; cursor: pointer; color: white; border: none; }
-    .primary-btn { background: linear-gradient(135deg, var(--blue), var(--purple)); }
-    .green-btn { background: var(--green); color: #064e3b; }
-    .danger-btn { background: rgba(251, 113, 133, 0.1); color: var(--red); border: 1px solid var(--red); border-radius: 15px; padding: 10px; cursor: pointer; }
+
+    .app {
+      width: min(1120px, calc(100% - 28px));
+      margin: 0 auto;
+      padding: 22px 0 0;
+      animation: fadeUp 0.45s ease both;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(15, 23, 42, 0.82), rgba(15, 23, 42, 0.62));
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 18px;
+      backdrop-filter: blur(20px);
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.2);
+      transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(56, 189, 248, 0.28);
+      box-shadow: 0 20px 58px rgba(0, 0, 0, 0.25);
+    }
+
+    .input {
+      width: 100%;
+      min-height: 50px;
+      border-radius: 17px;
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, .72);
+      color: var(--text);
+      padding: 0 14px;
+      margin-bottom: 15px;
+      outline: none;
+      font-size: 15px;
+      transition: border-color .2s ease, box-shadow .2s ease, background .2s ease, transform .2s ease;
+    }
+
+    .input::placeholder {
+      color: rgba(148, 163, 184, .78);
+    }
+
+    .input:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 4px var(--ring);
+      background: rgba(15, 23, 42, .9);
+    }
+
+    .primary-btn,
+    .green-btn {
+      width: 100%;
+      min-height: 50px;
+      border-radius: 17px;
+      font-weight: 900;
+      cursor: pointer;
+      color: white;
+      border: none;
+      letter-spacing: -0.01em;
+      position: relative;
+      overflow: hidden;
+      transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+    }
+
+    .primary-btn::after,
+    .green-btn::after,
+    .scan-fab::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(120deg, transparent 10%, rgba(255,255,255,.25), transparent 90%);
+      transform: translateX(-125%);
+      transition: transform .55s ease;
+      pointer-events: none;
+    }
+
+    .primary-btn:hover::after,
+    .green-btn:hover::after,
+    .scan-fab:hover::after {
+      transform: translateX(125%);
+    }
+
+    .primary-btn:hover,
+    .green-btn:hover,
+    .scan-fab:hover {
+      transform: translateY(-2px);
+      filter: brightness(1.05);
+    }
+
+    .primary-btn:active,
+    .green-btn:active,
+    .scan-fab:active,
+    .danger-btn:active {
+      transform: scale(.98);
+    }
+
+    .primary-btn {
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      box-shadow: 0 16px 35px rgba(56, 189, 248, 0.22);
+    }
+
+    .green-btn {
+      background: linear-gradient(135deg, #34d399, #22c55e);
+      color: #052e1a;
+      box-shadow: 0 16px 35px rgba(52, 211, 153, 0.18);
+    }
+
+    .danger-btn {
+      background: rgba(251, 113, 133, 0.1);
+      color: var(--red);
+      border: 1px solid rgba(251, 113, 133, 0.5);
+      border-radius: 15px;
+      padding: 10px 13px;
+      cursor: pointer;
+      font-weight: 850;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+
+    .danger-btn:hover {
+      background: rgba(251, 113, 133, 0.16);
+      border-color: rgba(251, 113, 133, 0.75);
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      min-height: 30px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(56, 189, 248, 0.3);
+      background: rgba(56, 189, 248, 0.1);
+      color: #bae6fd;
+      font-size: 12px;
+      font-weight: 850;
+    }
+
+    .section-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .section-title h2,
+    .section-title h3 {
+      margin: 0;
+      letter-spacing: -0.035em;
+    }
+
+    .section-title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
 
     /* Scanner Header Input */
-    .scanner-overlay-input { position: absolute; top: 10px; left: 10px; right: 10px; z-index: 10; }
-    #reader { position: relative; border-radius: 20px; overflow: hidden; background: #000; }
+    .scanner-overlay-input {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      z-index: 10;
+    }
 
-    /* CSS Dari versi sebelumnya tetap ada (Style-style tombol, list, dll) */
-    .topbar-inner { display: flex; align-items: center; justify-content: space-between; border: 1px solid var(--line); background: rgba(2, 6, 23, 0.55); border-radius: 999px; padding: 10px 16px; margin-bottom: 20px; }
-    .product-row { display: flex; justify-content: space-between; align-items: center; border: 1px solid var(--line); padding: 12px; border-radius: 15px; margin-bottom: 8px; background: var(--card-2); }
-    .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 500; display: none; align-items: center; justify-content: center; padding: 15px; backdrop-filter: blur(10px); }
-    .modal.active { display: flex; }
-    .modal-card { width: min(500px, 100%); background: var(--bg-2); border-radius: 24px; padding: 20px; border: 1px solid var(--line); }
-    .scan-fab-wrap { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 100; }
-    .scan-fab { padding: 15px 40px; border-radius: 50px; background: var(--blue); color: white; font-weight: bold; box-shadow: 0 10px 30px rgba(56,189,248,0.4); }
+    #reader {
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      background: #000;
+      min-height: 310px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.05);
+    }
+
+    #reader::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: min(72%, 310px);
+      height: 112px;
+      transform: translate(-50%, -50%);
+      border: 2px solid rgba(56, 189, 248, 0.85);
+      border-radius: 18px;
+      box-shadow: 0 0 0 999px rgba(2, 6, 23, 0.42), 0 0 28px rgba(56,189,248,.22);
+      z-index: 3;
+      pointer-events: none;
+    }
+
+    #reader::after {
+      content: "";
+      position: absolute;
+      left: 15%;
+      right: 15%;
+      top: 50%;
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--green), transparent);
+      z-index: 4;
+      animation: scanPulse 1.3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    #reader video,
+    #reader img,
+    #reader canvas {
+      border-radius: 22px !important;
+    }
+
+    /* Header */
+    .topbar-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border: 1px solid var(--line);
+      background: rgba(2, 6, 23, 0.55);
+      border-radius: 999px;
+      padding: 10px 16px;
+      margin-bottom: 20px;
+      backdrop-filter: blur(22px);
+      position: sticky;
+      top: 10px;
+      z-index: 20;
+      box-shadow: 0 14px 40px rgba(0,0,0,.18);
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      box-shadow: 0 12px 24px rgba(56,189,248,.22);
+      flex: 0 0 auto;
+    }
+
+    .brand-icon svg {
+      width: 22px;
+      height: 22px;
+      color: white;
+    }
+
+    .user-mini {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+      max-width: 210px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .stat-card {
+      border: 1px solid var(--line);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.62));
+      border-radius: 24px;
+      padding: 18px;
+      min-height: 128px;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 16px 45px rgba(0,0,0,.16);
+    }
+
+    .stat-card::after {
+      content: "";
+      position: absolute;
+      width: 120px;
+      height: 120px;
+      border-radius: 999px;
+      right: -48px;
+      top: -48px;
+      background: rgba(56, 189, 248, 0.13);
+    }
+
+    .stat-card.value::after {
+      background: rgba(52, 211, 153, 0.13);
+    }
+
+    .stat-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(56, 189, 248, 0.12);
+      border: 1px solid rgba(56, 189, 248, 0.22);
+      margin-bottom: 12px;
+      font-size: 20px;
+    }
+
+    .stat-card.value .stat-icon {
+      background: rgba(52, 211, 153, 0.12);
+      border-color: rgba(52, 211, 153, 0.22);
+    }
+
+    .stat-card h3 {
+      margin: 0;
+      font-size: clamp(24px, 6vw, 34px);
+      letter-spacing: -0.05em;
+      line-height: 1;
+    }
+
+    .stat-card p {
+      margin: 7px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    #priceDisplay {
+      min-height: 210px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #priceDisplay::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background: radial-gradient(circle at 85% 10%, rgba(56, 189, 248, 0.16), transparent 30%);
+      pointer-events: none;
+    }
+
+    #emptyResult {
+      min-height: 176px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      color: var(--muted);
+      position: relative;
+      z-index: 1;
+    }
+
+    .empty-box {
+      width: min(360px, 100%);
+      margin: 0 auto;
+    }
+
+    .empty-icon {
+      width: 62px;
+      height: 62px;
+      margin: 0 auto 14px;
+      display: grid;
+      place-items: center;
+      border-radius: 22px;
+      background: rgba(56, 189, 248, 0.1);
+      border: 1px solid rgba(56, 189, 248, 0.24);
+      font-size: 29px;
+    }
+
+    .empty-box b {
+      display: block;
+      color: var(--text);
+      font-size: 18px;
+      margin-bottom: 6px;
+      letter-spacing: -0.02em;
+    }
+
+    .empty-box span {
+      display: block;
+      line-height: 1.5;
+      font-size: 13px;
+    }
+
+    #foundProduct {
+      position: relative;
+      z-index: 1;
+      animation: fadeUp 0.28s ease both;
+    }
+
+    .product-result-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .result-badge {
+      width: 46px;
+      height: 46px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.25);
+      color: var(--green);
+      font-size: 22px;
+      flex: 0 0 auto;
+    }
+
+    #foundName {
+      margin: 10px 0 8px;
+      font-size: clamp(26px, 7vw, 46px);
+      letter-spacing: -0.055em;
+      line-height: 1.04;
+    }
+
+    #foundSellPrice {
+      margin: 0 0 8px;
+      font-size: clamp(32px, 9vw, 58px);
+      letter-spacing: -0.06em;
+      line-height: .98;
+      color: var(--green);
+      text-shadow: 0 14px 38px rgba(52, 211, 153, 0.18);
+    }
+
+    .buy-price-line {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      color: var(--muted);
+      background: rgba(2, 6, 23, 0.26);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 8px 12px;
+      margin-bottom: 14px;
+    }
+
+    .toolbar {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .toolbar .input {
+      margin-bottom: 0;
+    }
+
+    .search-wrap {
+      position: relative;
+    }
+
+    .search-wrap::before {
+      content: "⌕";
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+      z-index: 1;
+      font-size: 18px;
+    }
+
+    .search-wrap .input {
+      padding-left: 40px;
+    }
+
+    .add-short-btn {
+      width: auto;
+      padding: 0 18px;
+      white-space: nowrap;
+    }
+
+    .product-list-wrap {
+      margin-top: 18px;
+      display: grid;
+      gap: 10px;
+    }
+
+    .product-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 14px;
+      border: 1px solid var(--line);
+      padding: 13px;
+      border-radius: 18px;
+      margin-bottom: 0;
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.72), rgba(15, 23, 42, 0.56));
+      cursor: pointer;
+      transition: transform .18s ease, border-color .18s ease, background .18s ease;
+      animation: fadeUp .24s ease both;
+    }
+
+    .product-row:hover {
+      transform: translateY(-2px);
+      border-color: rgba(56, 189, 248, .34);
+      background: linear-gradient(180deg, rgba(30, 41, 59, 0.86), rgba(15, 23, 42, 0.68));
+    }
+
+    .product-name {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .product-avatar {
+      width: 42px;
+      height: 42px;
+      border-radius: 15px;
+      background: rgba(56, 189, 248, 0.11);
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      display: grid;
+      place-items: center;
+      color: #bae6fd;
+      font-weight: 900;
+      flex: 0 0 auto;
+    }
+
+    .product-meta {
+      min-width: 0;
+    }
+
+    .product-meta strong {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      letter-spacing: -0.02em;
+    }
+
+    .product-meta small {
+      display: block;
+      color: var(--muted);
+      margin-top: 4px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 12px;
+    }
+
+    .price-side {
+      text-align: right;
+      flex: 0 0 auto;
+    }
+
+    .sell-price-mini {
+      color: var(--green);
+      font-weight: 950;
+      margin-bottom: 7px;
+      letter-spacing: -0.02em;
+    }
+
+    .list-empty {
+      border: 1px dashed rgba(148, 163, 184, 0.28);
+      border-radius: 20px;
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      background: rgba(2, 6, 23, 0.18);
+      line-height: 1.5;
+    }
+
+    .list-empty b {
+      color: var(--text);
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      z-index: 500;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 15px;
+      backdrop-filter: blur(12px);
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-card {
+      width: min(500px, 100%);
+      max-height: calc(100vh - 30px);
+      overflow: auto;
+      background:
+        radial-gradient(circle at top right, rgba(56, 189, 248, 0.12), transparent 35%),
+        var(--bg-2);
+      border-radius: 28px;
+      padding: 20px;
+      border: 1px solid var(--line);
+      box-shadow: var(--shadow);
+      animation: popIn 0.26s ease both;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 15px;
+    }
+
+    .modal-head strong,
+    .modal-card h3 {
+      letter-spacing: -0.035em;
+    }
+
+    .modal-close {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease;
+    }
+
+    .modal-close:hover {
+      transform: rotate(4deg) scale(1.04);
+      background: rgba(255,255,255,0.08);
+    }
+
+    label {
+      display: inline-block;
+      margin: 0 0 7px 2px;
+      font-size: 12px;
+      color: #cbd5e1;
+      font-weight: 800;
+    }
+
+    .field-hint {
+      color: var(--muted);
+      font-size: 12px;
+      margin: -8px 0 12px 2px;
+      line-height: 1.4;
+    }
+
+    .scanner-help {
+      display: grid;
+      gap: 8px;
+      grid-template-columns: 1fr 1fr;
+      margin: 12px 0 0;
+    }
+
+    .scanner-help span {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.04);
+      border-radius: 16px;
+      padding: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .scanner-help b {
+      color: var(--text);
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .scan-fab-wrap {
+      position: fixed;
+      bottom: calc(30px + var(--safe-bottom));
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: min(440px, calc(100% - 34px));
+    }
+
+    .scan-fab {
+      width: 100%;
+      min-height: 58px;
+      padding: 15px 28px;
+      border-radius: 999px;
+      background: linear-gradient(135deg, var(--blue), var(--blue-2), var(--purple));
+      color: white;
+      font-weight: 950;
+      box-shadow: 0 18px 42px rgba(56,189,248,0.34);
+      border: 1px solid rgba(255,255,255,.2);
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      letter-spacing: .04em;
+      transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+    }
+
+    .scan-fab .scan-sub {
+      display: block;
+      font-size: 11px;
+      font-weight: 700;
+      opacity: .8;
+      letter-spacing: 0;
+      margin-top: 2px;
+    }
+
+    .toast-stack {
+      position: fixed;
+      top: 18px;
+      right: 18px;
+      display: grid;
+      gap: 10px;
+      z-index: 2000;
+      width: min(360px, calc(100% - 28px));
+      pointer-events: none;
+    }
+
+    .toast-item {
+      pointer-events: auto;
+      border: 1px solid var(--line);
+      background: rgba(15, 23, 42, 0.92);
+      backdrop-filter: blur(18px);
+      border-radius: 18px;
+      padding: 13px 14px;
+      box-shadow: 0 16px 42px rgba(0,0,0,.28);
+      animation: fadeUp .22s ease both;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: 10px;
+      align-items: start;
+    }
+
+    .toast-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      margin-top: 6px;
+      background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(56,189,248,.12);
+    }
+
+    .toast-item b {
+      display: block;
+      margin-bottom: 2px;
+      letter-spacing: -0.02em;
+    }
+
+    .toast-item span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .toast-item.success .toast-dot {
+      background: var(--green);
+      box-shadow: 0 0 0 4px rgba(52,211,153,.12);
+    }
+
+    .toast-item.error .toast-dot {
+      background: var(--red);
+      box-shadow: 0 0 0 4px rgba(251,113,133,.12);
+    }
+
+    @media (max-width: 720px) {
+      body {
+        padding-bottom: calc(112px + var(--safe-bottom));
+      }
+
+      .app {
+        width: min(100% - 22px, 1120px);
+        padding-top: 12px;
+      }
+
+      .topbar-inner {
+        border-radius: 24px;
+        align-items: center;
+        padding: 10px;
+      }
+
+      .brand-icon {
+        width: 38px;
+        height: 38px;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+
+      .stat-card {
+        min-height: 110px;
+      }
+
+      .toolbar {
+        grid-template-columns: 1fr;
+      }
+
+      .add-short-btn {
+        width: 100%;
+      }
+
+      .product-row {
+        align-items: flex-start;
+      }
+
+      .product-avatar {
+        width: 38px;
+        height: 38px;
+      }
+
+      .sell-price-mini {
+        font-size: 14px;
+      }
+
+      .modal {
+        align-items: flex-end;
+        padding: 10px;
+      }
+
+      .modal-card {
+        border-radius: 26px;
+        width: 100%;
+        max-height: calc(100vh - 20px);
+      }
+
+      #reader {
+        min-height: 330px;
+      }
+
+      .scanner-help,
+      .auth-helper {
+        grid-template-columns: 1fr;
+      }
+
+      .toast-stack {
+        top: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
+      }
+    }
+
+    @media (max-width: 420px) {
+      .auth-card {
+        padding: 22px;
+      }
+
+      .danger-btn {
+        padding: 9px 11px;
+        font-size: 12px;
+      }
+
+      .user-mini {
+        max-width: 150px;
+      }
+
+      .product-row {
+        gap: 8px;
+      }
+
+      .product-meta strong {
+        max-width: 150px;
+      }
+
+      .price-side {
+        max-width: 120px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+        transition-duration: .01ms !important;
+      }
+    }
   </style>
 </head>
 <body>
 
   <div id="authScreen">
     <div class="auth-card">
+      <div class="auth-logo">▦</div>
+      <div class="auth-pill">Database produk per akun</div>
       <h2 id="authTitle">Login Akun Toko</h2>
-      <p id="authSub" style="color: var(--muted); margin-bottom: 20px;">Masuk untuk akses database produk Anda.</p>
-      <input type="text" id="userInp" class="input" placeholder="Username" />
-      <input type="password" id="passInp" class="input" placeholder="Password" />
+      <p id="authSub" style="color: var(--muted); margin-bottom: 18px;">Masuk untuk akses database produk Anda.</p>
+
+      <div class="auth-helper">
+        <div><b>Aman per akun</b>Data produk dipisah berdasarkan username.</div>
+        <div><b>Cepat dipakai</b>Scan barcode, cari produk, lalu cek harga.</div>
+      </div>
+
+      <input type="text" id="userInp" class="input" placeholder="Username" autocomplete="username" />
+      <input type="password" id="passInp" class="input" placeholder="Password" autocomplete="current-password" />
       <button class="primary-btn" id="loginBtn">Masuk</button>
-      <p style="text-align:center; margin-top:15px; font-size:14px;">
-        Belum punya akun? <a href="#" id="toggleAuth" style="color:var(--blue)">Daftar Baru</a>
+      <p style="text-align:center; margin:15px 0 0; font-size:14px;">
+        Belum punya akun? <a href="#" id="toggleAuth" style="color:var(--blue); font-weight:900; text-decoration:none;">Daftar Baru</a>
       </p>
     </div>
   </div>
 
   <main id="mainApp" class="app hidden">
     <header class="topbar-inner">
-      <div style="display:flex; align-items:center; gap:10px;">
-        <div style="width:35px; height:35px; background:var(--blue); border-radius:10px;"></div>
-        <div>
-          <h1 style="font-size:16px; margin:0;">Cek Harga <span id="displayUser" style="color:var(--blue)"></span></h1>
+      <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+        <div class="brand-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 5h2v14H3zM8 5h1v14H8zM12 5h3v14h-3zM18 5h1v14h-1zM21 5h1v14h-1z" />
+          </svg>
+        </div>
+        <div style="min-width:0;">
+          <h1 style="font-size:16px; margin:0; letter-spacing:-0.03em;">Cek Harga Produk</h1>
+          <div class="user-mini">Login sebagai <span id="displayUser" style="color:var(--blue); font-weight:900;"></span></div>
         </div>
       </div>
       <button class="danger-btn" id="logoutBtn">Keluar</button>
     </header>
 
-    <section class="card">
-      <div style="display:flex; justify-content:space-between;">
-        <div>
-          <h3 id="totalProductStat">0</h3>
-          <p style="font-size:12px; color:var(--muted);">Total Produk</p>
-        </div>
-        <div style="text-align:right;">
-          <h3 id="totalValueStat">Rp0</h3>
-          <p style="font-size:12px; color:var(--muted);">Nilai Aset</p>
-        </div>
+    <section class="dashboard-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📦</div>
+        <h3 id="totalProductStat">0</h3>
+        <p>Total produk tersimpan</p>
+      </div>
+      <div class="stat-card value">
+        <div class="stat-icon">💰</div>
+        <h3 id="totalValueStat">Rp0</h3>
+        <p>Estimasi nilai aset dari harga jual</p>
       </div>
     </section>
 
     <div class="card" id="priceDisplay">
-      <div id="emptyResult">Scan produk untuk lihat harga.</div>
+      <div id="emptyResult">
+        <div class="empty-box">
+          <div class="empty-icon">⌁</div>
+          <b>Belum ada produk dipilih</b>
+          <span>Tekan tombol scan di bawah, input barcode manual, atau cari produk dari daftar untuk melihat harga.</span>
+        </div>
+      </div>
       <div id="foundProduct" class="hidden">
-        <span id="foundBarcode" class="tag"></span>
-        <h2 id="foundName"></h2>
-        <h1 id="foundSellPrice" style="color:var(--green)"></h1>
-        <p style="font-size:14px; color:var(--muted)">Harga Beli: <span id="foundBuyPrice"></span></p>
-        <button class="primary-btn" id="editFoundBtn" style="margin-top:10px;">Edit Data</button>
+        <div class="product-result-head">
+          <div>
+            <span id="foundBarcode" class="tag"></span>
+            <h2 id="foundName"></h2>
+          </div>
+          <div class="result-badge">✓</div>
+        </div>
+        <h1 id="foundSellPrice"></h1>
+        <p class="buy-price-line">Harga Beli: <span id="foundBuyPrice"></span></p>
+        <button class="primary-btn" id="editFoundBtn" style="margin-top:10px;">Edit Data Produk</button>
       </div>
     </div>
 
     <div class="card">
-      <input type="text" id="searchInput" class="input" placeholder="Cari Nama / Barcode..." style="margin-bottom:10px;">
-      <button class="green-btn" id="addProductBtn">+ Tambah Produk Manual</button>
-      <div id="productList" style="margin-top:20px;"></div>
+      <div class="section-title">
+        <div>
+          <h3>Database Produk</h3>
+          <p>Cari berdasarkan nama atau barcode, lalu klik produk untuk menampilkan harga.</p>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="search-wrap">
+          <input type="text" id="searchInput" class="input" placeholder="Cari Nama / Barcode...">
+        </div>
+        <button class="green-btn add-short-btn" id="addProductBtn">+ Tambah Produk</button>
+      </div>
+      <div id="productList" class="product-list-wrap"></div>
     </div>
   </main>
 
   <div class="modal" id="scannerModal">
     <div class="modal-card">
-      <div style="display:flex; justify-content:space-between; margin-bottom:15px;">
-        <strong>Scanner Aktif</strong>
-        <button id="closeScannerBtn" style="background:none; color:white; font-size:20px;">✕</button>
+      <div class="modal-head">
+        <div>
+          <strong>Scanner Aktif</strong>
+          <p style="margin:4px 0 0; color:var(--muted); font-size:13px;">Arahkan kamera ke barcode produk.</p>
+        </div>
+        <button id="closeScannerBtn" class="modal-close" type="button">✕</button>
       </div>
-      
+
       <div style="position:relative;">
         <div class="scanner-overlay-input">
-          <input type="text" id="scannerTypeName" class="input" placeholder="Atau ketik nama produk di sini..." style="background: rgba(15,23,42,0.9); border: 2px solid var(--blue);">
+          <input type="text" id="scannerTypeName" class="input" placeholder="Atau ketik nama produk di sini..." style="background: rgba(15,23,42,0.92); border: 2px solid var(--blue); margin-bottom:0;">
         </div>
         <div id="reader"></div>
+      </div>
+
+      <div class="scanner-help">
+        <span><b>Tips scan</b>Pastikan barcode terang dan masuk kotak biru.</span>
+        <span><b>Alternatif</b>Ketik nama produk atau masukkan barcode manual.</span>
       </div>
 
       <div style="margin-top:15px;">
@@ -126,27 +1198,45 @@
 
   <div class="modal" id="productModal">
     <div class="modal-card">
-      <h3 id="productModalTitle">Tambah Produk</h3>
+      <div class="modal-head">
+        <div>
+          <h3 id="productModalTitle" style="margin:0;">Tambah Produk</h3>
+          <p style="margin:4px 0 0; color:var(--muted); font-size:13px;">Isi data produk dengan jelas agar mudah dicari.</p>
+        </div>
+        <button type="button" class="modal-close" id="closeProductXBtn">✕</button>
+      </div>
+
       <form id="productForm">
         <input type="hidden" id="editingBarcodeOriginal" />
-        <label style="font-size:12px;">Barcode</label>
+        <label>Barcode</label>
         <input type="text" id="barcodeInput" class="input" required />
-        <label style="font-size:12px;">Nama Produk</label>
+        <div class="field-hint">Barcode bisa dari hasil scan atau diketik manual.</div>
+
+        <label>Nama Produk</label>
         <input type="text" id="nameInput" class="input" required />
+
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-          <div><label style="font-size:12px;">Harga Beli</label><input type="text" id="buyPriceInput" class="input" required /></div>
-          <div><label style="font-size:12px;">Harga Jual</label><input type="text" id="sellPriceInput" class="input" required /></div>
+          <div>
+            <label>Harga Beli</label>
+            <input type="text" id="buyPriceInput" class="input" required inputmode="numeric" />
+          </div>
+          <div>
+            <label>Harga Jual</label>
+            <input type="text" id="sellPriceInput" class="input" required inputmode="numeric" />
+          </div>
         </div>
         <button type="submit" class="green-btn">Simpan ke Cloud</button>
-        <button type="button" class="primary-btn" id="closeProductBtn" style="margin-top:10px; background:var(--card-2)">Batal</button>
+        <button type="button" class="primary-btn" id="closeProductBtn" style="margin-top:10px; background:var(--card-2); box-shadow:none;">Batal</button>
         <button type="button" class="danger-btn" id="deleteFromModalBtn" style="margin-top:10px; width:100%; display:none;">Hapus Produk</button>
       </form>
     </div>
   </div>
 
   <div class="scan-fab-wrap">
-    <button class="scan-fab" id="scanBtn">SCAN BARCODE</button>
+    <button class="scan-fab" id="scanBtn">SCAN BARCODE <span class="scan-sub">kamera belakang / input manual</span></button>
   </div>
+
+  <div class="toast-stack" id="toastStack"></div>
 
   <script>
     // --- STATE MANAGEMENT ---
@@ -155,25 +1245,29 @@
     let isRegisterMode = false;
     let html5QrCode = null;
     let scanLock = false;
+    let currentFoundBarcode = null;
 
     const el = (id) => document.getElementById(id);
 
     // --- AUTH LOGIC ---
-    el("toggleAuth").onclick = () => {
+    el("toggleAuth").onclick = (event) => {
+      event.preventDefault();
       isRegisterMode = !isRegisterMode;
       el("authTitle").innerText = isRegisterMode ? "Daftar Akun Baru" : "Login Akun Toko";
       el("authSub").innerText = isRegisterMode ? "Buat akun untuk mulai mengelola toko." : "Masuk untuk akses database produk Anda.";
       el("loginBtn").innerText = isRegisterMode ? "Daftar Sekarang" : "Masuk";
       el("toggleAuth").innerText = isRegisterMode ? "Sudah punya akun? Login" : "Daftar Baru";
+      el("passInp").setAttribute("autocomplete", isRegisterMode ? "new-password" : "current-password");
     };
 
     el("loginBtn").onclick = async () => {
       const u = el("userInp").value.trim();
       const p = el("passInp").value.trim();
-      if(!u || !p) return alert("Isi username & password");
+      if(!u || !p) return toast("Lengkapi data", "Isi username dan password dulu.", "error");
 
       const action = isRegisterMode ? 'register' : 'login';
       try {
+        setBtnLoading(el("loginBtn"), true, isRegisterMode ? "Mendaftarkan..." : "Masuk...");
         const res = await fetch('/api/auth', {
           method: 'POST',
           body: JSON.stringify({ action, u, p })
@@ -182,11 +1276,16 @@
         if(data.success) {
           currentUser = u;
           localStorage.setItem("user_session", u);
+          toast("Berhasil", isRegisterMode ? "Akun berhasil dibuat." : "Login berhasil.", "success");
           initApp();
         } else {
-          alert(data.message);
+          toast("Gagal", data.message || "Username atau password salah.", "error");
         }
-      } catch (e) { alert("Server error"); }
+      } catch (e) {
+        toast("Server error", "Gagal terhubung ke server.", "error");
+      } finally {
+        setBtnLoading(el("loginBtn"), false);
+      }
     };
 
     el("logoutBtn").onclick = () => {
@@ -205,30 +1304,35 @@
 
     async function loadData() {
       try {
-        const res = await fetch(`/api/data?u=${currentUser}`);
+        const res = await fetch(`/api/data?u=${encodeURIComponent(currentUser)}`);
         products = await res.json();
+        if (!products || typeof products !== "object") products = {};
         renderAll();
-      } catch (e) { toast("Error", "Gagal load data"); }
+      } catch (e) {
+        toast("Error", "Gagal load data.", "error");
+      }
     }
 
     async function syncToServer() {
       try {
-        await fetch(`/api/data?u=${currentUser}`, {
+        await fetch(`/api/data?u=${encodeURIComponent(currentUser)}`, {
           method: 'POST',
           body: JSON.stringify(products)
         });
         renderAll();
-      } catch (e) { toast("Error", "Gagal sinkronisasi"); }
+      } catch (e) {
+        toast("Error", "Gagal sinkronisasi.", "error");
+      }
     }
 
     // --- SCANNER WITH TYPE-SEARCH ---
     el("scannerTypeName").oninput = (e) => {
-      const q = e.target.value.toLowerCase();
+      const q = e.target.value.toLowerCase().trim();
       if(q.length < 2) return;
       // Cari produk berdasarkan nama saat ngetik di scanner
-      const found = Object.values(products).find(p => p.name.toLowerCase().includes(q));
+      const found = Object.values(products).find(p => String(p.name || "").toLowerCase().includes(q));
       if(found) {
-        toast("Ditemukan!", found.name);
+        toast("Ditemukan", found.name, "success");
         handleScannedCode(found.barcode);
       }
     };
@@ -236,33 +1340,42 @@
     async function openScanner() {
       el("scannerModal").classList.add("active");
       el("scannerTypeName").value = "";
+      el("manualBarcodeInput").value = "";
+      scanLock = false;
       if (!html5QrCode) html5QrCode = new Html5Qrcode("reader");
       try {
         await html5QrCode.start({ facingMode: "environment" }, {
-          fps: 10, qrbox: { width: 260, height: 100 },
+          fps: 10,
+          qrbox: { width: 260, height: 100 },
           experimentalFeatures: { useBarCodeDetectorIfSupported: true }
         }, (txt) => {
           if (scanLock) return;
           scanLock = true;
           handleScannedCode(txt);
         });
-      } catch (e) { toast("Kamera Error", "Gagal akses kamera"); }
+      } catch (e) {
+        toast("Kamera Error", "Gagal akses kamera. Coba izinkan kamera atau pakai input manual.", "error");
+      }
     }
 
     async function closeScanner() {
       el("scannerModal").classList.remove("active");
       scanLock = false;
-      if (html5QrCode) { try { await html5QrCode.stop(); } catch(e){} }
+      if (html5QrCode) {
+        try { await html5QrCode.stop(); } catch(e){}
+      }
     }
 
     function handleScannedCode(code) {
-      const barcode = code.trim();
+      const barcode = String(code || "").trim();
+      if (!barcode) return toast("Barcode kosong", "Masukkan barcode terlebih dahulu.", "error");
       closeScanner();
       if(products[barcode]) {
         showProductResult(products[barcode]);
+        toast("Produk ditemukan", products[barcode].name, "success");
       } else {
         openProductModal(null, barcode);
-        toast("Baru", "Barcode belum terdaftar");
+        toast("Produk baru", "Barcode belum terdaftar. Silakan isi datanya.");
       }
     }
 
@@ -275,6 +1388,7 @@
       el("foundName").innerText = p.name;
       el("foundSellPrice").innerText = rupiah(p.sellPrice);
       el("foundBuyPrice").innerText = rupiah(p.buyPrice);
+      window.scrollTo({ top: Math.max(0, el("priceDisplay").offsetTop - 88), behavior: "smooth" });
     }
 
     function openProductModal(p = null, pre = "") {
@@ -290,9 +1404,14 @@
         el("deleteFromModalBtn").style.display = "block";
       } else {
         el("productModalTitle").innerText = "Tambah Produk";
+        el("editingBarcodeOriginal").value = "";
         el("barcodeInput").value = pre;
         el("deleteFromModalBtn").style.display = "none";
       }
+      setTimeout(() => {
+        const target = pre ? el("nameInput") : el("barcodeInput");
+        target.focus();
+      }, 120);
     }
 
     el("productForm").onsubmit = (e) => {
@@ -301,49 +1420,168 @@
       const n = el("nameInput").value.trim();
       const bp = parseMoney(el("buyPriceInput").value);
       const sp = parseMoney(el("sellPriceInput").value);
-      
+
+      if (!b || !n) return toast("Data belum lengkap", "Barcode dan nama produk wajib diisi.", "error");
+      if (!bp || !sp) return toast("Harga belum valid", "Harga beli dan jual harus berupa angka.", "error");
+
       const oldB = el("editingBarcodeOriginal").value;
       if(oldB && oldB !== b) delete products[oldB];
-      
+
       products[b] = { barcode: b, name: n, buyPrice: bp, sellPrice: sp, updatedAt: new Date().toISOString() };
       syncToServer();
       el("productModal").classList.remove("active");
-      toast("Berhasil", "Data disimpan ke cloud");
+      showProductResult(products[b]);
+      toast("Berhasil", "Data disimpan ke cloud.", "success");
     };
 
     // --- UTILS ---
     function renderAll() {
-      const list = Object.values(products);
+      const list = Object.values(products || {});
       el("totalProductStat").innerText = list.length;
-      el("totalValueStat").innerText = rupiah(list.reduce((s,i)=>s+Number(i.sellPrice),0));
-      
-      const query = el("searchInput").value.toLowerCase();
-      el("productList").innerHTML = list
-        .filter(i => i.name.toLowerCase().includes(query) || i.barcode.includes(query))
-        .map(i => `
-          <div class="product-row" onclick="showProductResult(products['${i.barcode}'])">
-            <div>
-              <strong>${i.name}</strong><br><small>${i.barcode}</small>
-            </div>
-            <div style="text-align:right">
-              <div style="color:var(--green)">${rupiah(i.sellPrice)}</div>
-              <button class="tag" onclick="event.stopPropagation(); openProductModal(products['${i.barcode}'])">Edit</button>
-            </div>
+      el("totalValueStat").innerText = rupiah(list.reduce((s,i)=>s+Number(i.sellPrice || 0),0));
+
+      const query = el("searchInput").value.toLowerCase().trim();
+      const filtered = list
+        .filter(i => String(i.name || "").toLowerCase().includes(query) || String(i.barcode || "").includes(query))
+        .sort((a, b) => String(a.name || "").localeCompare(String(b.name || ""), "id"));
+
+      if (!filtered.length) {
+        el("productList").innerHTML = `
+          <div class="list-empty">
+            <b>${query ? "Produk tidak ditemukan" : "Belum ada produk"}</b>
+            ${query ? "Coba kata kunci lain atau tambahkan produk baru." : "Klik tombol tambah produk atau scan barcode untuk mulai mengisi database."}
           </div>
-        `).join("");
+        `;
+        return;
+      }
+
+      el("productList").innerHTML = filtered
+        .map(i => {
+          const safeBarcode = escapeHtml(String(i.barcode || ""));
+          const safeName = escapeHtml(String(i.name || "Produk"));
+          const initial = safeName.slice(0, 1).toUpperCase();
+          return `
+            <div class="product-row" onclick="showProductResult(products['${jsKey(i.barcode)}'])">
+              <div class="product-name">
+                <div class="product-avatar">${initial}</div>
+                <div class="product-meta">
+                  <strong>${safeName}</strong>
+                  <small>${safeBarcode}</small>
+                </div>
+              </div>
+              <div class="price-side">
+                <div class="sell-price-mini">${rupiah(i.sellPrice)}</div>
+                <button class="tag" onclick="event.stopPropagation(); openProductModal(products['${jsKey(i.barcode)}'])">Edit</button>
+              </div>
+            </div>
+          `;
+        }).join("");
     }
 
-    function rupiah(v) { return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(v); }
-    function parseMoney(v) { return Number(String(v).replace(/[^0-9]/g, "")); }
-    function toast(t, m) { alert(`${t}: ${m}`); } // Sederhanakan untuk demo, bisa pakai CSS Toast kamu yang lama
+    function rupiah(v) {
+      return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(Number(v || 0));
+    }
+
+    function parseMoney(v) {
+      return Number(String(v).replace(/[^0-9]/g, ""));
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function jsKey(value) {
+      return String(value).replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+    }
+
+    function toast(t, m, type = "info") {
+      const stack = el("toastStack");
+      const item = document.createElement("div");
+      item.className = `toast-item ${type}`;
+      item.innerHTML = `
+        <div class="toast-dot"></div>
+        <div><b>${escapeHtml(t)}</b><span>${escapeHtml(m || "")}</span></div>
+      `;
+      stack.appendChild(item);
+      setTimeout(() => {
+        item.style.opacity = "0";
+        item.style.transform = "translateY(-8px)";
+        setTimeout(() => item.remove(), 220);
+      }, 2600);
+    }
+
+    function setBtnLoading(btn, loading, text = "Memproses...") {
+      if (!btn) return;
+      if (loading) {
+        btn.dataset.oldText = btn.innerText;
+        btn.innerText = text;
+        btn.disabled = true;
+        btn.style.opacity = "0.8";
+        btn.style.cursor = "wait";
+      } else {
+        btn.innerText = btn.dataset.oldText || btn.innerText;
+        btn.disabled = false;
+        btn.style.opacity = "";
+        btn.style.cursor = "";
+      }
+    }
+
+    function closeProductModal() {
+      el("productModal").classList.remove("active");
+    }
 
     // INIT
     if(currentUser) initApp();
     el("scanBtn").onclick = openScanner;
     el("closeScannerBtn").onclick = closeScanner;
     el("addProductBtn").onclick = () => openProductModal();
-    el("closeProductBtn").onclick = () => el("productModal").classList.remove("active");
+    el("closeProductBtn").onclick = closeProductModal;
+    el("closeProductXBtn").onclick = closeProductModal;
     el("searchInput").oninput = renderAll;
+
+    el("manualCheckBtn").onclick = () => {
+      handleScannedCode(el("manualBarcodeInput").value);
+    };
+
+    el("editFoundBtn").onclick = () => {
+      if (currentFoundBarcode && products[currentFoundBarcode]) openProductModal(products[currentFoundBarcode]);
+      else toast("Pilih produk", "Scan atau klik produk dulu sebelum edit.", "error");
+    };
+
+    el("deleteFromModalBtn").onclick = async () => {
+      const b = el("editingBarcodeOriginal").value || el("barcodeInput").value.trim();
+      if (!b || !products[b]) return closeProductModal();
+      const ok = confirm(`Hapus produk ${products[b].name}?`);
+      if (!ok) return;
+      delete products[b];
+      if (currentFoundBarcode === b) {
+        currentFoundBarcode = null;
+        el("foundProduct").classList.add("hidden");
+        el("emptyResult").classList.remove("hidden");
+      }
+      await syncToServer();
+      closeProductModal();
+      toast("Terhapus", "Produk berhasil dihapus.", "success");
+    };
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key !== "Escape") return;
+      if (el("scannerModal").classList.contains("active")) closeScanner();
+      if (el("productModal").classList.contains("active")) closeProductModal();
+    });
+
+    el("scannerModal").addEventListener("click", (event) => {
+      if (event.target === el("scannerModal")) closeScanner();
+    });
+
+    el("productModal").addEventListener("click", (event) => {
+      if (event.target === el("productModal")) closeProductModal();
+    });
   </script>
 </body>
 </html>
